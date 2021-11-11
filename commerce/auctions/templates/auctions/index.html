@@ -1,0 +1,39 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>
+        {% if watchlist %}
+            My Watchlist <span class="badge badge-secondary">{{ listings | length }}</span>
+        {% else %}
+            Active Listings
+            {% if category %}
+                for <code>{{ category }}</code>
+            {% endif %}
+            <span class="badge badge-secondary">{{ listings | length }}</span>
+        {% endif %}
+    </h2>
+
+    <div class="listing">
+        {% for listing in listings %}
+            <div class="row">
+                <div class="col-lg-4 col-sm-6">
+                    {% if listing.image_url %}
+                        <img src="{{ listing.image_url }}" width="300px" alt="{{ listing.title }}">
+                    {% endif %}
+                </div>
+                <div class="col-lg-8 col-sm-6">
+                    <h4><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h4>
+                    <h5>Price: ${{ listing.current_price | floatformat:2 }}</h5>
+                    <p>
+                        {{ listing.description }}
+                    </p>
+                    <small>
+                        Created by {{ listing.owner.username }} at {{ listing.created_time }}
+                    </small>
+                </div>
+            </div>
+        {% empty %}
+            No listing.
+        {% endfor %}
+    </div>
+{% endblock %}

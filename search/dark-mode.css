@@ -1,0 +1,329 @@
+/* DARK MODE ON */
+/* Initial setup */
+body,
+input {
+  background-color: #202124;
+  font-size: 14px;
+  font-family: arial, sans-serif;
+  color: #bdc1c6;
+}
+
+/* Set whole window width */
+.wrapper {
+  height: 100vh;
+}
+
+/* Right align header links */
+.header {
+  justify-content: flex-end;
+  display: flex;
+  margin-right: 15px;
+}
+
+/* Set link color */
+.header a {
+  color: white;
+  margin: 5px;
+  padding: 5px 10px;
+  text-decoration: none; /* remove underline */
+}
+
+/* Show underline when hovered */
+.header a:hover {
+  text-decoration: underline;
+}
+
+/* Logo box that can shrink/expand in height */
+.glogobox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 92px; /* logo height */
+  max-height: 250px;
+  height: calc(100% - 350px);
+  box-sizing: border-box;
+}
+
+/* Make logo stick to bottom of the logo box */
+.glogo {
+  max-height: 92px;
+  height: 100%;
+  margin-top: auto;
+}
+
+/* Set gap with logo */
+.gformbox {
+  padding: 20px;
+}
+
+/* Outside wrapper for both search box and buttons: Align to center and set sizing */
+.gsearchbox {
+  max-width: 584px;
+  width: auto;
+  margin: 0 auto; /* align to center */
+  padding-top: 6px;
+}
+
+/* Wrapper for search box: Set rounded search box and a flexbox to contain children */
+.gsearch {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #5f6368;
+  box-shadow: none;
+  border-radius: 24px;
+  padding: 5px 16px 0 16px;
+}
+
+/* Change background color for search box when hovered*/
+.gsearch:hover {
+  background-color: #303134;
+}
+
+/* Set search icon box styles */
+.giconbox {
+  display: flex;
+  align-items: center;
+  padding-right: 13px;
+  margin-top: -5px;
+}
+
+/* Set icon styles */
+.gicon {
+  margin-top: 3px;
+  color: #9aa0a6;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  fill: currentColor; /* override icon color (black) */
+}
+
+/* Input text box container */
+.ginputbox {
+  flex: 100%; /* expand input text box */
+  margin-top: -5px;
+}
+
+/* Set text color and input text box sizing */
+.ginput {
+  background-color: transparent;
+  border: none; /* remove border around text input box */
+  outline: none; /* remove outline around text input box */
+  color: #e8eaed;
+  font-size: 16px;
+  height: 44px;
+  width: calc(100% - 24px); /* narrower less than the input box container */
+  box-sizing: border-box;
+}
+
+/* Wrapper for buttons: Set gap with search box */
+.gbutton {
+  margin-top: 18px;
+}
+
+/* Align buttons to center */
+.center {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  justify-content: center;
+}
+
+/* Set button border, color, and sizing */
+.gbutton input[type="submit"] {
+  background-color: #303134;
+  border: 1px solid #303134;
+  border-radius: 4px;
+  color: #e8eaed;
+  margin: 11px 6px;
+  padding: 0 16px;
+  height: 36px;
+  text-align: center;
+}
+
+/* Set border when hover */
+.gbutton input[type="submit"]:hover {
+  border: 1px solid #5f6368;
+}
+
+/***********************************************************************************
+ADVANCED SEARCH STYLES BELOW
+***********************************************************************************/
+
+/* logo banner */
+.nav {
+  display: flex;
+  justify-content: space-between; /* style logo and link on each side of the nav */
+  width: 100%;
+  padding: 8px;
+  height: 48px;
+}
+
+/* Google logo */
+.headerlogo {
+  padding: 12px;
+}
+
+/* Style heading wrapper */
+.heading {
+  margin: 25px 35px;
+}
+
+/* Style heading */
+.heading label {
+  margin-left: 10px;
+  color: #f28b82;
+  font-size: 20px;
+}
+
+/* Style the divider between heading and form */
+.divider {
+  border-bottom: 1px solid #3c4043;
+}
+
+/* Reset margin for the divider and the whole page */
+body {
+  margin: 0;
+}
+
+.sectionwrapper {
+  width: 100%;
+}
+
+/* Styles for the whole form */
+.formbox {
+  max-width: 1140px;
+  min-width: 200px;
+  width: 96%;
+  margin: 40px 2% 0 45px;
+}
+
+/* Section that wrap around each field row */
+.keywords {
+  clear: both; /* must clear property applies to floating and non-floating elements */
+}
+
+/* Style the form headline row that contains "Find pages with... " */
+.headline {
+  height: 30px;
+  color: #e8eaed;
+}
+
+/* Styles for "Find pages with.." */
+.title {
+  font-size: 16px;
+  font-weight: 500;
+  color: inherit;
+}
+
+/* Styles for the blank column in the middle of the headline row */
+.blankcol {
+  width: 50%;
+  float: left;
+  min-width: 167px;
+  min-height: 41px;
+}
+
+/* Styles for the last column of the headline row "To do this in the search box" */
+.todo {
+  font-size: 13px;
+  font-weight: 700;
+  color: inherit;
+}
+
+/* Styles for the label of each field row */
+.rlabel {
+  float: left;
+  font-size: 13px;
+  width: 16%;
+  min-width: 167px;
+  height: 42px;
+}
+
+/* vertically align texts */
+.vmiddlebox {
+  display: table-cell;
+  vertical-align: middle;
+  height: 30px;
+}
+
+/* Styles for the input's outside wrapper */
+.keywords .rinputbox {
+  float: left;
+  width: 50%;
+  min-width: 167px;
+  min-height: 41px;
+  vertical-align: middle;
+}
+
+/* Set padding for input's inside wrapper */
+.keywords .rinput {
+  padding-right: 16px;
+}
+
+/* Styles for the input field itself */
+.keywords .rinput input {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #5f6368;
+  border-radius: 1px;
+  outline: none;
+  color: #bdc1c6;
+  height: 25px;
+  padding: 1px 8px;
+}
+
+/* Change input field's color when focused */
+.keywords .rinput input:focus {
+  border-color: #8ab4f8;
+}
+
+/* Styles for the how-to text's outside wrapper */
+.rhowto {
+  float: left;
+  width: 32%;
+  position: relative;
+  padding-left: 5px;
+  margin: 0 0 8px 1%;
+}
+
+/* Styles for the how-to text's inside wrapper */
+.howto {
+  min-width: 160px;
+  color: #969ba1;
+  font-size: 11px;
+  margin: 0 0 5px 1%;
+}
+
+/* Styles for examples */
+span.examples {
+  color: #dadce0;
+  font-family: monospace;
+  white-space: pre;
+}
+
+/* Styles for submit button */
+.buttonaction {
+  float: right;
+  padding: 0 12px;
+  height: 30px;
+  min-width: 120px;
+  background: #8ab4f8;
+  border: 1px solid #8ab4f8;
+  border-radius: 2px;
+  color: #202124;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+/* Change button color when hovered */
+.buttonaction:hover {
+  background: #aecbfa;
+}
+
+/* hide how-to texts when screen is small */
+@media (max-width: 1056px) {
+  .todo,
+  .howto {
+    display: none !important;
+  }
+}
