@@ -1,4 +1,4 @@
-# CS50W Project 1 - Commerce
+# CS50W Project 2 - Commerce
 ## Description
 Design an auction site that allows users to post listings, place bids, comment, and add listings to a “watchlist.”
 
