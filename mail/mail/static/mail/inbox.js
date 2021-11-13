@@ -113,7 +113,7 @@ function load_mailbox(mailbox) {
                              <div><strong>Timestamp:</strong> ${email.timestamp}</div>
                              <button id="reply" class="btn btn-sm btn-outline-primary">Reply</button>
                              <hr>
-                             <div>${email.body.replace(/\r?\n/g, '<br />')}</div>`;
+                             <div>${email.body.replace(/\r?\n/g, '<br />')}</div>`; // format body
         
         // Add email content to view
         document.querySelector('#email-view').append(content);
@@ -170,18 +170,23 @@ function load_mailbox(mailbox) {
   // Reply to an email
   function reply_email(email) {
 
+    // Pre-fill receipient
     if (mailbox === 'sent') {
       document.querySelector('#compose-recipients').value = email.recipients;
     }
     else {
       document.querySelector('#compose-recipients').value = email.sender;
     }
+
+    // Pre-fill subject and add Re: if none
     if (email.subject.startsWith('Re:')) {
       document.querySelector('#compose-subject').value = email.subject;
     }
     else {
       document.querySelector('#compose-subject').value = 'Re: ' + email.subject;
     }
+
+    // Pre-fill body with text
     document.querySelector('#compose-body').value = `\nOn ${email.timestamp} ${email.sender} wrote: \n${email.body}`;
 
     // Show compose view and hide other views
