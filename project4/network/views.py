@@ -27,10 +27,14 @@ def index(request):
 def profile(request, id):
     user = User.objects.get(pk=id)
     posts = Post.objects.filter(author=user).order_by('-timestamp')
+    num_followers = user.followers.all().count()
+    num_following = user.following.all().count()
 
     return render(request, "network/profile.html", {
         "username": user.username,
         "posts": posts_list_with_num_likes(posts),
+        "num_followers": num_followers,
+        "num_following": num_following,
     })
 
 

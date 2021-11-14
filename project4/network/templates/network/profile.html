@@ -2,8 +2,21 @@
 
 {% block body %}
     <h2>{{ username | capfirst }}'s Profile</h2>
-    <div>
-        xx Followers oo Following
+    <div class="following">
+        <p>
+            {% if num_followers %}
+                {{ num_followers }} 
+            {% else %}
+                0
+            {% endif %}
+                Followers
+            {% if num_following %}
+                {{ num_following }}
+            {% else %}
+                0
+            {% endif %}
+                Following
+        </p>
     </div>
 
     {% if user.username != username and user.is_authenticated %}
