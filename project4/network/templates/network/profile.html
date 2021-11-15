@@ -20,7 +20,13 @@
     </div>
 
     {% if user.username != username and user.is_authenticated %}
-        Follow Unfollow
+        <div class="follow">
+            {% if is_following %}
+                <button id="unfollow" class="btn btn-sm btn-primary">Unfollow</button>
+            {% else %}
+                <button id="follow" class="btn btn-sm btn-primary">Follow</button>
+            {% endif %}
+        </div>
     {% endif %}
 
     <h2>Posts</h2>

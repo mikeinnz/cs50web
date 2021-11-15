@@ -1,11 +1,12 @@
 body {
     margin: 10px;
 }
+
 h2 {
     margin-left: 10px;
 }
 
-.following {
+.following, .follow, .pagination {
     margin-left: 10px;
 }
 

@@ -1,3 +1,6 @@
+from django.core.paginator import Paginator
+
+
 def posts_list_with_num_likes(posts):
     """
     Add number of likes to each post in a posts list
@@ -7,3 +10,11 @@ def posts_list_with_num_likes(posts):
         p.num_likes = p.liked_users.all().count()
         plist.append(p)
     return plist
+
+
+def paginate_posts(request, posts):
+    # Show 10 posts per page
+    paginator = Paginator(posts_list_with_num_likes(posts), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj

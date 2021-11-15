@@ -1,3 +1,4 @@
+from typing import List
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -6,7 +7,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import Like, Post, User
-from .util import posts_list_with_num_likes
+from .util import posts_list_with_num_likes, paginate_posts
 
 
 def index(request):
@@ -20,24 +21,29 @@ def index(request):
 
     return render(request, "network/index.html", {
         "heading": "All Posts",
-        "posts": posts_list_with_num_likes(posts),
+        'page_obj': paginate_posts(request, posts),
     })
 
 
 def profile(request, id):
-    user = User.objects.get(pk=id)
-    posts = Post.objects.filter(author=user).order_by('-timestamp')
-    num_followers = user.followers.all().count()
-    num_following = user.following.all().count()
+    u = User.objects.get(pk=id)
+    posts = Post.objects.filter(author=u).order_by('-timestamp')
+
+    is_following = False
+    if request.user.is_authenticated:
+        if u in [f.user for f in request.user.following.all()]:
+            is_following = True
 
     return render(request, "network/profile.html", {
-        "username": user.username,
+        "username": u.username,
         "posts": posts_list_with_num_likes(posts),
-        "num_followers": num_followers,
-        "num_following": num_following,
+        "num_followers": u.followers.all().count(),
+        "num_following": u.following.all().count(),
+        "is_following": is_following,
     })
 
 
+@login_required
 def following(request, id):
     user = User.objects.get(pk=id)
     posts = Post.objects.filter(
@@ -45,7 +51,7 @@ def following(request, id):
 
     return render(request, "network/index.html", {
         "heading": "Following",
-        "posts": posts_list_with_num_likes(posts),
+        "page_obj": paginate_posts(request, posts),
     })
 
 
