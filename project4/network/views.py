@@ -1,4 +1,3 @@
-from typing import List
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -36,7 +35,7 @@ def profile(request, id):
 
     return render(request, "network/profile.html", {
         "username": u.username,
-        "posts": posts_list_with_num_likes(posts),
+        "page_obj": paginate_posts(request, posts),
         "num_followers": u.followers.all().count(),
         "num_following": u.following.all().count(),
         "is_following": is_following,

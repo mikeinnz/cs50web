@@ -1,7 +1,14 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    <h2>{{ username | capfirst }}'s Profile</h2>
+    <h2>
+        {% if user.username == username %}
+            Your Profile
+        {% else %}
+            {{ username | capfirst }}'s Profile
+        {% endif %}
+    </h2>
     <div class="following">
         <p>
             {% if num_followers %}
@@ -30,14 +37,9 @@
     {% endif %}
 
     <h2>Posts</h2>
-    <div class="posts">
-        {% for post in posts %}
-            <div class="postbox">
-                <div class="postauthor">{{ post.author.username }}</div>
-                <div>{{ post.content }}</div>
-                <div class="postdate">{{ post.timestamp }}</div>
-                <div class="likes">&#10084;&#65039; {{post.num_likes}}</div>
-            </div>
-        {% endfor %}
-    </div>
+    {% include 'network/posts.html' %}
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
 {% endblock %}
