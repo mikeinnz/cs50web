@@ -1,11 +1,16 @@
+import json
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
-from .models import Like, Post, User
+
+from .models import Follow, Like, Post, User
 from .util import posts_list_with_num_likes, paginate_posts
 
 
@@ -34,12 +39,56 @@ def profile(request, id):
             is_following = True
 
     return render(request, "network/profile.html", {
-        "username": u.username,
+        "profile": u,
         "page_obj": paginate_posts(request, posts),
         "num_followers": u.followers.all().count(),
         "num_following": u.following.all().count(),
         "is_following": is_following,
     })
+
+
+# TODO: remove @csrf_exempt
+@csrf_exempt
+def follow(request, id):
+
+    try:
+        u = User.objects.get(pk=id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User does not exist"}, status=404)
+
+    if request.method == "GET":
+        is_following = False
+        if request.user.is_authenticated:
+            if u in [f.user for f in request.user.following.all()]:
+                is_following = True
+
+        return JsonResponse({"is_following": is_following})
+
+    elif request.method == "PUT":
+        data = json.loads(request.body)
+
+        # Follow
+        if data.get("follow"):
+            follow = Follow(user=u, follower=request.user)
+            print(f"Follow: {follow}")
+            if follow not in list(u.following.all()) and u != request.user:
+                follow.save()
+                print("Save")
+        # Unfollow
+        else:
+            # TODO must have only one record
+            follow = Follow.objects.filter(user=u, follower=request.user)
+            print(f"Unfollow: {follow}")
+            # if follow in list(request.user.following.all()):
+            print("before deleting")
+            follow.delete()
+            print("Deleted")
+        return HttpResponse(status=204)
+
+    else:
+        return JsonResponse({
+            "error": "GET or PUT request required."
+        }, status=400)
 
 
 @login_required
