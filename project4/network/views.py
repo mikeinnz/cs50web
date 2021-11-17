@@ -62,27 +62,25 @@ def follow(request, id):
             if u in [f.user for f in request.user.following.all()]:
                 is_following = True
 
-        return JsonResponse({"is_following": is_following})
+        return JsonResponse({"is_following": is_following,
+                             "num_followers": u.followers.all().count(),
+                             })
 
     elif request.method == "PUT":
         data = json.loads(request.body)
 
         # Follow
         if data.get("follow"):
-            follow = Follow(user=u, follower=request.user)
-            print(f"Follow: {follow}")
-            if follow not in list(u.following.all()) and u != request.user:
+            # Only update database when there is no similar record and ensure user is not following themselves
+            if not Follow.objects.filter(user=u, follower=request.user).exists() and u != request.user:
+                follow = Follow(user=u, follower=request.user)
                 follow.save()
-                print("Save")
+
         # Unfollow
         else:
-            # TODO must have only one record
+            # Remove record from database
             follow = Follow.objects.filter(user=u, follower=request.user)
-            print(f"Unfollow: {follow}")
-            # if follow in list(request.user.following.all()):
-            print("before deleting")
             follow.delete()
-            print("Deleted")
         return HttpResponse(status=204)
 
     else:

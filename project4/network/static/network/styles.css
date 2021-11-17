@@ -6,8 +6,8 @@ h2 {
     margin-left: 10px;
 }
 
-.following, .follow, .pagination {
-    margin-left: 10px;
+.following, .followbtn, .pagination {
+    margin: 10px;
 }
 
 .postbox {

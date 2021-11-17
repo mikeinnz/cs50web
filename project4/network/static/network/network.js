@@ -1,38 +1,48 @@
 document.addEventListener('DOMContentLoaded', function() {
+    load_follow_btn();
+});
 
-    e = document.getElementById('id')
+function load_follow_btn() {
+    e = document.getElementById('profile_id');
     if (e != null) {
         id = e.value;
         fetch(`/follow/${id}`)
         .then(response => response.json())
-        .then(follow => {
-            console.log(follow.is_following);
+        .then(data => {
+            console.log(data.is_following);
             console.log(id);
 
+            // Update number of followers
+            document.getElementById('num_followers').innerHTML = data.num_followers;
+
+            // Clear out existing contents
+            document.getElementById('followbtn').innerHTML = '';
+
+            // Dynamically create follow button
             const element = document.createElement('button');
-            element.className = "btn btn-sm btn-primary";
-            if (follow.is_following) {
-                element.innerHTML = "Unfollow";
+            element.className = 'btn btn-sm btn-primary';
+            if (data.is_following) {
+                element.innerHTML = 'Unfollow';
             }
             else {
-                element.innerHTML = "Follow";
+                element.innerHTML = 'Follow';
             }
 
             element.addEventListener('click', function() {
-                console.log('Oohooo clicked');
-
+                // Update database
                 fetch(`/follow/${id}`, {
                     method: 'PUT',
                     body: JSON.stringify({
-                        follow: !follow.is_following
+                        follow: !data.is_following
                     })
-                  })
-                  .then(() => {
-                      console.log('Okay, flicked!');
-                  })
+                })
+                .then(() => {
+                    load_follow_btn();
+                })
+                
             });
 
-            document.querySelector("#follow").append(element);
+            document.getElementById('followbtn').append(element);
         })
     }
-});
+}
