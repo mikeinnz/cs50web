@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     load_follow_btn();
+
+    // 'Edit' link for posts belonging to the current user
+    document.querySelectorAll('.edit').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            console.log(link.dataset.postid);
+
+            // Prevent the link from working as an anchor tag
+            event.preventDefault();
+        })
+    })
 });
 
 function load_follow_btn() {

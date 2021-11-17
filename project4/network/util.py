@@ -1,5 +1,8 @@
 from django.core.paginator import Paginator
 
+# Number of posts per page
+POSTS_PER_PAGE = 10
+
 
 def posts_list_with_num_likes(posts):
     """
@@ -13,8 +16,10 @@ def posts_list_with_num_likes(posts):
 
 
 def paginate_posts(request, posts):
-    # Show 10 posts per page
-    paginator = Paginator(posts_list_with_num_likes(posts), 10)
+    """
+    Paginating posts
+    """
+    paginator = Paginator(posts_list_with_num_likes(posts), POSTS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj

@@ -2,6 +2,9 @@
     {% for post in page_obj %}
         <div class="postbox">
             <div class="postauthor"><a href="{% url 'profile' post.author.id %}">{{ post.author.username }}</a></div>
+            {% if user == post.author %}
+                <a class="edit" href="" data-postid="{{ post.id }}">Edit</a>
+            {% endif %}
             <div>{{ post.content }}</div>
             <div class="postdate">{{ post.timestamp }}</div>
             <div class="likes">&#10084;&#65039; {{post.num_likes}}</div>

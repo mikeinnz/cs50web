@@ -1,4 +1,5 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
     <h2>{{ heading }}</h2>
@@ -18,4 +19,9 @@
     {% endif %}
 
     {% include 'network/posts.html' %}
+{% endblock %}
+
+<!-- TODO: Use a different js file, maybe in posts.html-->
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
 {% endblock %}
