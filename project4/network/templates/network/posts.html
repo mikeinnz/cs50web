@@ -1,11 +1,24 @@
+{% load static %}
+
 <div class="posts">
     {% for post in page_obj %}
         <div class="postbox">
             <div class="postauthor"><a href="{% url 'profile' post.author.id %}">{{ post.author.username }}</a></div>
             {% if user == post.author %}
-                <a class="edit" href="" data-postid="{{ post.id }}">Edit</a>
+                <a class="edit-link" href="" data-postid="{{ post.id }}">Edit</a>
+                <div id="edit-block-{{ post.id }}" class="edit-block form-group">
+                    <form id="edit-form-{{ post.id }}">
+                        <div class="form-group">
+                            <textarea id="edit-text-{{ post.id }}" type="text" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-sm btn-primary" value="Save">
+                        </div>
+                    </form>
+                </div>
+
             {% endif %}
-            <div>{{ post.content }}</div>
+            <div id="post-content-{{ post.id }}">{{ post.content }}</div>
             <div class="postdate">{{ post.timestamp }}</div>
             <div class="likes">&#10084;&#65039; {{post.num_likes}}</div>
         </div>
@@ -32,3 +45,7 @@
         </span>
     </div>
 </div>
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
+{% endblock %}

@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 from .models import Follow, Like, Post, User
-from .util import posts_list_with_num_likes, paginate_posts
+from .util import paginate_posts
 
 
 def index(request):
@@ -45,6 +45,28 @@ def profile(request, id):
         "num_following": u.following.all().count(),
         "is_following": is_following,
     })
+
+
+@csrf_exempt
+def edit(request, id):
+
+    # Query for requested post
+    try:
+        post = Post.objects.get(pk=id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found."}, status=404)
+
+    if request.method == "PUT":
+        data = json.loads(request.body)
+
+        if data.get("content") is not None:
+            # TODO why Model does not check max length
+            post.content = data["content"]
+        post.save()
+        return JsonResponse({"message": "Edit successfully."}, status=201)
+
+    else:
+        return JsonResponse({"error": "PUT request required."}, status=400)
 
 
 # TODO: remove @csrf_exempt
