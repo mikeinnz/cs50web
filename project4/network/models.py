@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxLengthValidator
 from django.db import models
+
+POST_MAX_LENGTH = 280
 
 
 class User(AbstractUser):
@@ -10,7 +13,8 @@ class User(AbstractUser):
 class Post(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts")
-    content = models.TextField(max_length=280)
+    content = models.CharField(max_length=POST_MAX_LENGTH, validators=[MaxLengthValidator(
+        POST_MAX_LENGTH, "Must be less than 280 characters.")])
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

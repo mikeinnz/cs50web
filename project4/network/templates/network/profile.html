@@ -22,6 +22,7 @@
 
     {% if user.username != profile.username and user.is_authenticated %}
         <input type="hidden" id="profile_id" value="{{ profile.id }}">
+        {% csrf_token %}
         <div class="followbtn" id="followbtn">
         </div>
     {% endif %}

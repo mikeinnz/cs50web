@@ -1,5 +1,11 @@
+@media only screen and (min-width: 992px) {
+    body {
+        max-width: 600px;
+    }
+}
+
 body {
-    margin: 10px;
+    cursor: pointer;
 }
 
 h2 {
@@ -22,18 +28,22 @@ h2 {
     margin-bottom: 5px;
 }
 
-.postdate, .likes {
+.postdate {
     color: grey;
 }
 
 .like-icon {
     padding: 0 8px;
+    font-size: 1.1em;
     color: red;
 }
 
-
 .like-icon:hover {
-    background-color: #cccccc;
+    background-color: #aaaaaa;
     transition: background-color .5s;
-    cursor: pointer;
+}
+
+.num-likes {
+    font-size: 0.9em;
+    color: grey;
 }

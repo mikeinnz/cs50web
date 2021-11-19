@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     load_likes();
 });
 
+
 function load_follow_btn() {
     e = document.getElementById('profile_id');
     if (e != null) {
@@ -32,7 +33,13 @@ function load_follow_btn() {
 
             element.addEventListener('click', function() {
                 // Update database
-                fetch(`/follow/${id}`, {
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const request = new Request(
+                    `/follow/${id}`,
+                    {headers: {'X-CSRFToken': csrftoken}}
+                );
+
+                fetch(request, {
                     method: 'PUT',
                     body: JSON.stringify({
                         follow: !data.is_following
@@ -80,16 +87,21 @@ function load_edit_form() {
             const text = document.getElementById(`edit-text-${postid}`);
             text.focus();
             // pre-fill 'edit' textarea with post content
-            text.value = content.innerHTML; // TODO: save  & load content when Edit is toggled
+            text.value = content.innerHTML;
             // set cursor at the end in a textarea
             text.setSelectionRange(text.value.length, text.value.length);
-
-
+            
             // When 'Save' button is clicked, save to database
             document.getElementById(`edit-form-${postid}`).onsubmit = () => {
-
+                
                 // Update database
-                fetch(`/edit/${postid}`, {
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const request = new Request(
+                    `/edit/${postid}`,
+                    {headers: {'X-CSRFToken': csrftoken}}
+                );
+
+                fetch(request, {
                     method: 'PUT',
                     body: JSON.stringify({
                         content: text.value
@@ -99,7 +111,8 @@ function load_edit_form() {
                 .then(result => {
                     if (result.error) {
                         alert(result.error);
-                      }
+                        return false;
+                    }
                     // Reload the elements with new content
                     editblock.style.display = 'none';
                     content.innerHTML = text.value;
@@ -154,8 +167,14 @@ function load_likes() {
                         like.style.opacity = "0.4";
                         num_likes.innerHTML = parseInt(num_likes.innerHTML) - 1;
                     }
+
                     // Update database
-                    fetch(`/post/${postid}`, {
+                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const request = new Request(
+                        `/post/${postid}`,
+                        {headers: {'X-CSRFToken': csrftoken}}
+                    );
+                    fetch(request, {
                         method: "PUT",
                         body: JSON.stringify({
                             like: !post.liked
@@ -164,7 +183,5 @@ function load_likes() {
                 }
             });
         })
-
-
     });
 }

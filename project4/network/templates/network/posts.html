@@ -8,6 +8,7 @@
                 <a class="edit-link" href="" data-postid="{{ post.id }}">Edit</a>
                 <div id="edit-block-{{ post.id }}" class="edit-block form-group">
                     <form id="edit-form-{{ post.id }}">
+                        {% csrf_token %}
                         <div class="form-group">
                             <textarea id="edit-text-{{ post.id }}" type="text" class="form-control"></textarea>
                         </div>
@@ -16,13 +17,13 @@
                         </div>
                     </form>
                 </div>
-
             {% endif %}
+            
             <div id="post-content-{{ post.id }}">{{ post.content }}</div>
             <div class="postdate">{{ post.timestamp }}</div>
             <div class="likes">
-                <span data-postid="{{ post.id }}" class="like-icon">&hearts;</span>
-                <span id="num-likes-{{ post.id }}">
+                <span data-postid="{{ post.id }}" class="like-icon align-middle">&hearts;</span>
+                <span id="num-likes-{{ post.id }}" class="num-likes align-middle">
                 </span>
             </div>
         </div>

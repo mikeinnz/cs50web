@@ -2,15 +2,15 @@ import json
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 
 
-from .models import Follow, Like, Post, User
+from .models import Follow, Like, Post, User, POST_MAX_LENGTH
 from .util import paginate_posts
 
 
@@ -29,7 +29,6 @@ def index(request):
     })
 
 
-@csrf_exempt
 def post(request, postid):
 
     # Query for requested post
@@ -86,7 +85,6 @@ def profile(request, id):
     })
 
 
-@csrf_exempt
 def edit(request, postid):
 
     # Query for requested post
@@ -99,8 +97,11 @@ def edit(request, postid):
         data = json.loads(request.body)
 
         if data.get("content") is not None:
-            # TODO why Model does not check max length
             post.content = data["content"]
+
+        # Check max length
+        if len(post.content) > POST_MAX_LENGTH:
+            return JsonResponse({"error": "Must be less than 280 characters."}, status=404)
         post.save()
         return JsonResponse({"message": "Edit successfully."}, status=201)
 
@@ -108,8 +109,6 @@ def edit(request, postid):
         return JsonResponse({"error": "PUT request required."}, status=400)
 
 
-# TODO: remove @csrf_exempt
-@csrf_exempt
 def follow(request, id):
 
     try:

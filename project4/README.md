@@ -4,3 +4,5 @@ Design a Twitter-like social network website for making posts and following user
 
 #### Future improvements
 - Use Bootstrap to style pagination
+- Use javascript to save edited content that has not been submited
+- Show active page on navigation
