@@ -1,6 +1,55 @@
 document.addEventListener('DOMContentLoaded', function() {
     load_follow_btn();
 
+    load_edit_form();
+
+    load_likes();
+});
+
+function load_follow_btn() {
+    e = document.getElementById('profile_id');
+    if (e != null) {
+        id = e.value;
+        fetch(`/follow/${id}`)
+        .then(response => response.json())
+        .then(data => {
+
+            // Update number of followers
+            document.getElementById('num_followers').innerHTML = data.num_followers;
+
+            // Clear out existing contents
+            document.getElementById('followbtn').innerHTML = '';
+
+            // Dynamically create follow button
+            const element = document.createElement('button');
+            element.className = 'btn btn-sm btn-primary';
+            if (data.is_following) {
+                element.innerHTML = 'Unfollow';
+            }
+            else {
+                element.innerHTML = 'Follow';
+            }
+
+            element.addEventListener('click', function() {
+                // Update database
+                fetch(`/follow/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        follow: !data.is_following
+                    })
+                })
+                .then(() => {
+                    load_follow_btn();
+                });
+                
+            });
+
+            document.getElementById('followbtn').append(element);
+        });
+    };
+}
+
+function load_edit_form() {
     // Hide all Edit forms
     const elements = document.querySelectorAll('.edit-block');
     for (let element of elements) {
@@ -67,47 +116,55 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
         });
     });
-});
+}
 
-function load_follow_btn() {
-    e = document.getElementById('profile_id');
-    if (e != null) {
-        id = e.value;
-        fetch(`/follow/${id}`)
+
+function load_likes() {
+    // Event for each like button
+    document.querySelectorAll('.like-icon').forEach(function(like) {
+
+        const postid = like.dataset.postid;
+        
+        const num_likes = document.getElementById(`num-likes-${postid}`);
+        
+        // Query server to see whether the post is liked by the current user or not
+        fetch(`/post/${postid}`)
         .then(response => response.json())
-        .then(data => {
+        .then(post => {
 
-            // Update number of followers
-            document.getElementById('num_followers').innerHTML = data.num_followers;
+            // dynamically display number of likes
+            num_likes.innerHTML = post.num_likes;
 
-            // Clear out existing contents
-            document.getElementById('followbtn').innerHTML = '';
-
-            // Dynamically create follow button
-            const element = document.createElement('button');
-            element.className = 'btn btn-sm btn-primary';
-            if (data.is_following) {
-                element.innerHTML = 'Unfollow';
-            }
-            else {
-                element.innerHTML = 'Follow';
+            // if not liked by current user, change opacity
+            if (!post.liked) {
+                like.style.opacity = "0.4";
             }
 
-            element.addEventListener('click', function() {
-                // Update database
-                fetch(`/follow/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        follow: !data.is_following
-                    })
-                })
-                .then(() => {
-                    load_follow_btn();
-                });
+            // Click event for like icon
+            like.addEventListener('click', function() {
                 
+                // Only proceed if user is logged in
+                if (post.logged_in) {
+                    // Update number of likes without querying database
+                    if (like.style.opacity == "0.4") {
+                        like.style.opacity = "1";
+                        num_likes.innerHTML = parseInt(num_likes.innerHTML) + 1;
+                    }
+                    else {
+                        like.style.opacity = "0.4";
+                        num_likes.innerHTML = parseInt(num_likes.innerHTML) - 1;
+                    }
+                    // Update database
+                    fetch(`/post/${postid}`, {
+                        method: "PUT",
+                        body: JSON.stringify({
+                            like: !post.liked
+                        })
+                    })
+                }
             });
+        })
 
-            document.getElementById('followbtn').append(element);
-        });
-    };
+
+    });
 }

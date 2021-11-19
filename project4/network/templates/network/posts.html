@@ -20,7 +20,11 @@
             {% endif %}
             <div id="post-content-{{ post.id }}">{{ post.content }}</div>
             <div class="postdate">{{ post.timestamp }}</div>
-            <div class="likes">&#10084;&#65039; {{post.num_likes}}</div>
+            <div class="likes">
+                <span data-postid="{{ post.id }}" class="like-icon">&hearts;</span>
+                <span id="num-likes-{{ post.id }}">
+                </span>
+            </div>
         </div>
     {% endfor %}
     <div class="pagination">

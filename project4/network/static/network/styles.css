@@ -25,3 +25,15 @@ h2 {
 .postdate, .likes {
     color: grey;
 }
+
+.like-icon {
+    padding: 0 8px;
+    color: red;
+}
+
+
+.like-icon:hover {
+    background-color: #cccccc;
+    transition: background-color .5s;
+    cursor: pointer;
+}

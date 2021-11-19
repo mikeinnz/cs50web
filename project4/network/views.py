@@ -29,6 +29,45 @@ def index(request):
     })
 
 
+@csrf_exempt
+def post(request, postid):
+
+    # Query for requested post
+    try:
+        post = Post.objects.get(pk=postid)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found."}, status=404)
+
+    # Return email contents
+    if request.method == "GET":
+        return JsonResponse({"id": post.id,
+                            "num_likes": post.liked_users.all().count(),
+                             "liked": request.user in [like.user for like in post.liked_users.all()],
+                             "logged_in": request.user.is_authenticated
+                             })
+
+    elif request.method == "PUT":
+
+        if not request.user.is_authenticated:
+            return HttpResponse(status=400)
+        else:
+            data = json.loads(request.body)
+            if data.get("like") is not None:
+                if not Like.objects.filter(post=post, user=request.user).exists():
+                    like = Like(post=post, user=request.user)
+                    like.save()
+                else:
+                    like = Like.objects.filter(post=post, user=request.user)
+                    like.delete()
+
+        return HttpResponse(status=204)
+
+    else:
+        return JsonResponse({
+            "error": "GET or PUT request required."
+        }, status=400)
+
+
 def profile(request, id):
     u = User.objects.get(pk=id)
     posts = Post.objects.filter(author=u).order_by('-timestamp')
@@ -48,11 +87,11 @@ def profile(request, id):
 
 
 @csrf_exempt
-def edit(request, id):
+def edit(request, postid):
 
     # Query for requested post
     try:
-        post = Post.objects.get(pk=id)
+        post = Post.objects.get(pk=postid)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found."}, status=404)
 
