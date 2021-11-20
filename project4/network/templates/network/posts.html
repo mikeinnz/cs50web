@@ -48,7 +48,7 @@
                         <li class="page-item active">
                             <a class="page-link" href="?page={{ i }}">{{ i }}</a>
                         </li>
-                    {% elif i <= page_obj.number|add:'1' and i >= page_obj.number|add:'-2' %}
+                    {% elif i <= page_obj.number|add:'1' and i >= page_obj.number|add:'-1' %}
                         <li class="page-item">
                             <a class="page-link" href="?page={{ i }}">{{ i }}</a>
                         </li>
