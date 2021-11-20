@@ -11,6 +11,8 @@ function load_follow_btn() {
     e = document.getElementById('profile_id');
     if (e != null) {
         id = e.value;
+
+        // Get data from database
         fetch(`/follow/${id}`)
         .then(response => response.json())
         .then(data => {
@@ -55,6 +57,7 @@ function load_follow_btn() {
         });
     };
 }
+
 
 function load_edit_form() {
     // Hide all Edit forms

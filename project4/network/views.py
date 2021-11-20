@@ -2,7 +2,6 @@ import json
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http.response import JsonResponse
@@ -37,7 +36,7 @@ def post(request, postid):
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found."}, status=404)
 
-    # Return email contents
+    # Return post details
     if request.method == "GET":
         return JsonResponse({"id": post.id,
                             "num_likes": post.liked_users.all().count(),
@@ -45,6 +44,7 @@ def post(request, postid):
                              "logged_in": request.user.is_authenticated
                              })
 
+    # Save like to database
     elif request.method == "PUT":
 
         if not request.user.is_authenticated:
@@ -68,23 +68,22 @@ def post(request, postid):
 
 
 def profile(request, id):
-    u = User.objects.get(pk=id)
-    posts = Post.objects.filter(author=u).order_by('-timestamp')
+    try:
+        user = User.objects.get(pk=id)
+    except User.DoesNotExist:
+        return HttpResponse(status=404)
 
-    is_following = False
-    if request.user.is_authenticated:
-        if u in [f.user for f in request.user.following.all()]:
-            is_following = True
+    posts = Post.objects.filter(author=user).order_by('-timestamp')
 
     return render(request, "network/profile.html", {
-        "profile": u,
+        "profile": user,
         "page_obj": paginate_posts(request, posts),
-        "num_followers": u.followers.all().count(),
-        "num_following": u.following.all().count(),
-        "is_following": is_following,
+        "num_followers": user.followers.all().count(),
+        "num_following": user.following.all().count(),
     })
 
 
+@login_required
 def edit(request, postid):
 
     # Query for requested post
@@ -109,6 +108,7 @@ def edit(request, postid):
         return JsonResponse({"error": "PUT request required."}, status=400)
 
 
+@login_required
 def follow(request, id):
 
     try:
@@ -131,7 +131,7 @@ def follow(request, id):
 
         # Follow
         if data.get("follow"):
-            # Only update database when there is no similar record and ensure user is not following themselves
+            # Only update database when there is no existing record and ensure user is not following themselves
             if not Follow.objects.filter(user=u, follower=request.user).exists() and u != request.user:
                 follow = Follow(user=u, follower=request.user)
                 follow.save()
