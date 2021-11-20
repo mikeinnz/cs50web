@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 
 # Number of posts per page
-POSTS_PER_PAGE = 3
+POSTS_PER_PAGE = 10
 
 
 def paginate_posts(request, posts):
