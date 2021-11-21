@@ -1,0 +1,32 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>
+        {% if user.username == profile.username %}
+            Your Profile
+        {% else %}
+            {{ profile.username | capfirst }}'s Profile
+        {% endif %}
+    </h2>
+    <div class="following">
+        <span id="num_followers">
+                {{ num_followers }} 
+        </span>
+        Followers
+        <span id="num_following">
+                {{ num_following }}
+        </span>
+        Following
+    </div>
+
+    {% if user.username != profile.username and user.is_authenticated %}
+        <input type="hidden" id="profile_id" value="{{ profile.id }}">
+        {% csrf_token %}
+        <div class="followbtn" id="followbtn">
+        </div>
+    {% endif %}
+
+    <h2>Posts</h2>
+    {% include 'network/posts.html' %}
+{% endblock %}

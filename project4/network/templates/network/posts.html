@@ -1,0 +1,74 @@
+{% load static %}
+
+<div class="posts">
+    {% for post in page_obj %}
+        <div class="postbox">
+            <div class="postauthor"><a href="{% url 'profile' post.author.id %}">{{ post.author.username }}</a></div>
+            {% if user == post.author %}
+                <a class="edit-link" href="" data-postid="{{ post.id }}">Edit</a>
+                <div id="edit-block-{{ post.id }}" class="edit-block form-group">
+                    <form id="edit-form-{{ post.id }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea id="edit-text-{{ post.id }}" type="text" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-sm btn-primary" value="Save">
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+
+            <div id="post-content-{{ post.id }}">{{ post.content }}</div>
+            <div class="postdate">{{ post.timestamp }}</div>
+            <div class="likes">
+                <span data-postid="{{ post.id }}" class="like-icon align-middle">&hearts;</span>
+                <span id="num-likes-{{ post.id }}" class="num-likes align-middle">
+                </span>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if not page_obj.object_list %}
+        <span class="pagination">No posts.</span>
+    {% else %}
+        <nav aria-label="pagination">
+            <ul class="pagination pagination-sm">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; first</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    </li>
+                {% endif %}
+
+                {% for i in page_obj.paginator.page_range %}
+                    {% if i == page_obj.number %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% elif i <= page_obj.number|add:'1' and i >= page_obj.number|add:'-1' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
+{% endblock %}

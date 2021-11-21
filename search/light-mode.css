@@ -1,0 +1,146 @@
+/* LIGHT MODE */
+/* Initial setup */
+body,
+input {
+  background-color: #fff; /* UPDATED vs dark mode */
+  font-size: 14px;
+  font-family: arial, sans-serif;
+  color: #202124; /* UPDATED vs dark mode */
+}
+
+/* Set whole window width */
+.wrapper {
+  height: 100vh;
+}
+
+/* Right align header links */
+.header {
+  justify-content: flex-end;
+  display: flex;
+  margin-right: 15px;
+}
+
+/* Set link color */
+.header a {
+  color: inherit;
+  margin: 5px;
+  padding: 5px;
+  text-decoration: none; /* remove underline */
+}
+
+/* Show underline when hovered */
+.header a:hover {
+  text-decoration: underline;
+}
+
+/* Remove visited color */
+.header a:visited {
+  color: inherit;
+}
+
+/* Logo box that can shrink/expand in height */
+.glogobox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 92px; /* logo height */
+  max-height: 250px;
+  height: calc(100% - 350px);
+  box-sizing: border-box;
+}
+
+/* Make logo stick to bottom of the logo box */
+.glogo {
+  max-height: 92px;
+  height: 100%;
+  margin-top: auto;
+  position: relative; /* Set relative to style the text 'images' to the logo - see direct below */
+}
+
+/* Styles for the text "images" */
+.images {
+  color: #4285f4;
+  font: 16px/16px roboto-regular, arial, sans-serif;
+  position: absolute; /* Set absolute to style the text 'images' to the logo */
+  left: 215px;
+  bottom: 0px;
+}
+
+/* Set gap with logo */
+.gformbox {
+  padding: 20px;
+}
+
+/* Outside wrapper for both search box and buttons: Align to center and set sizing */
+.gsearchbox {
+  max-width: 584px;
+  width: auto;
+  margin: 0 auto; /* align to center */
+  padding-top: 6px;
+}
+
+/* Wrapper for search box: Set rounded search box and a flexbox to contain children */
+.gsearch {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #dfe1e5; /* UPDATED vs dark mode */
+  box-shadow: none;
+  border-radius: 24px;
+  padding: 5px 16px 0 16px;
+}
+
+/* Change background color for search box when hovered*/
+.gsearch:hover {
+  background-color: #fff; /* UPDATED vs dark mode */
+  box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28); /* ADDED */
+  border-color: rgba(223, 225, 229, 0); /* ADDED */
+}
+
+/* Set search icon box styles */
+.giconbox {
+  display: flex;
+  align-items: center;
+  padding-right: 13px;
+  margin-top: -5px;
+}
+
+/* Set icon styles */
+.gicon {
+  color: #9aa0a6;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  fill: currentColor; /* override icon color (black) */
+}
+
+/* Input text box container */
+.ginputbox {
+  flex: 100%; /* expand input text box */
+  margin-top: -5px;
+}
+
+/* Set text color and input text box sizing */
+.ginput {
+  background-color: transparent;
+  border: none; /* remove border around text input box */
+  outline: none; /* remove outline around text input box */
+  color: inherit; /* UPDATED vs dark mode */
+  font-size: 16px;
+  height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Remove standard styles applied the search icon button on the right */
+.giconboxright {
+  background-color: transparent;
+  border: none;
+  padding-right: 0px; /* override existing padding */
+}
+
+/* Style the search icon on the right */
+.right {
+  color: #4285f4; /* override existing styles */
+  height: 24px;
+  width: 24px;
+}

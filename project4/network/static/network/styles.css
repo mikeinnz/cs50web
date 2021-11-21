@@ -1,0 +1,49 @@
+@media only screen and (min-width: 992px) {
+    body {
+        max-width: 600px;
+    }
+}
+
+body {
+    cursor: pointer;
+}
+
+h2 {
+    margin-left: 10px;
+}
+
+.following, .followbtn, .pagination {
+    margin: 10px;
+}
+
+.postbox {
+    border: 1px solid lightgrey;
+    margin: 10px;
+    padding: 10px;
+}
+
+.postauthor {
+    font-size: large;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.postdate {
+    color: grey;
+}
+
+.like-icon {
+    padding: 0 8px;
+    font-size: 1.1em;
+    color: red;
+}
+
+.like-icon:hover {
+    background-color: #aaaaaa;
+    transition: background-color .5s;
+}
+
+.num-likes {
+    font-size: 0.9em;
+    color: grey;
+}
