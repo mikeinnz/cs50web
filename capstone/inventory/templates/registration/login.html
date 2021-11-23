@@ -1,7 +1,15 @@
-<h2>Login</h2>
+{% extends 'inventory/layout.html' %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input class="btn btn-primary" type="submit" value="Login">
-</form>
+{% block title %}
+    Login
+{% endblock %}
+
+{% block body %}
+    <h2>Login</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-warning" type="submit" value="Login">
+    </form>
+{% endblock %}
