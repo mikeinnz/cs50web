@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path('', views.index, name="index"),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('customer/new', views.create_customer, name="create_customer")
 ]
