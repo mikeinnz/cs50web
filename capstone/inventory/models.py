@@ -46,7 +46,7 @@ class CustomerContactForm(ModelForm):
         fields = ['first_name', 'last_name',
                   'company', 'email', 'phone', 'note']
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'company': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.TextInput(attrs={'class': 'form-control'}),
@@ -97,7 +97,7 @@ class WarehouseForm(ModelForm):
         model = Warehouse
         fields = ['warehouse']
         widgets = {
-            'warehouse': forms.TextInput(attrs={'class': 'form-control'}),
+            'warehouse': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
         }
 
 

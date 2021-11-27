@@ -14,6 +14,8 @@ def index(request):
 
 @login_required
 def create_customer(request):
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
 
     if request.method == "POST":
         customer = Customer()
@@ -65,6 +67,50 @@ def edit_customer(request, id):
 
 @login_required
 def warehouse(request):
-    return render(request, "inventory/warehouse.html", {
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
 
+    warehouses = Warehouse.objects.filter(
+        user=request.user).order_by('warehouse')
+    return render(request, "inventory/warehouse.html", {
+        'warehouses': warehouses
     })
+
+
+@login_required
+def create_warehouse(request):
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
+
+    if request.method == "POST":
+        warehouse = Warehouse(user=request.user)
+        warehouse_form = WarehouseForm(
+            request.POST or None, instance=warehouse)
+        if warehouse_form.is_valid:
+            warehouse_form.save()
+        return HttpResponseRedirect(reverse("warehouse"))
+
+    else:
+        return render(request, "inventory/warehouse_form.html", {
+            "form": WarehouseForm()
+        })
+
+
+@login_required
+def edit_warehouse(request, id):
+    try:
+        warehouse = Warehouse.objects.get(pk=id)
+    except Warehouse.DoesNotExist:
+        JsonResponse({"error": "Warehouse not found."}, status=404)
+
+    if request.method == "POST":
+        warehouse_form = WarehouseForm(
+            request.POST or None, instance=warehouse)
+        if warehouse_form.is_valid:
+            warehouse_form.save()
+        return HttpResponseRedirect(reverse("warehouse"))
+
+    else:
+        return render(request, "inventory/warehouse_form.html", {
+            "form": WarehouseForm(instance=warehouse)
+        })

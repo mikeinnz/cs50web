@@ -1,0 +1,19 @@
+{% extends 'inventory/layout.html' %}
+
+{% block title %}
+    Create A New Warehouse
+{% endblock %}
+
+{% block body %}
+    <h2>Create A New Warehouse</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <div class="pt-2 pb-2 mb-3 border-top">
+            <a class="btn btn-warning btn-sm" href="{% url 'warehouse' %}">Cancel</a>
+            <input class="btn btn-warning btn-sm" type="submit" value="Save">
+        </div>
+    </form>
+
+{% endblock %}
