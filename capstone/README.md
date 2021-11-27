@@ -16,3 +16,4 @@ Key features:
 
 
 ## Future Improvements
+- Style pagination colors

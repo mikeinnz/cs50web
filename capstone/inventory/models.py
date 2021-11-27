@@ -1,6 +1,7 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.deletion import DO_NOTHING
+from django.db.models.deletion import CASCADE, DO_NOTHING
 from django.forms import ModelForm, widgets
 
 from datetime import date
@@ -16,6 +17,7 @@ STATUS_CHOICES = [
 
 
 class Customer(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="customers")
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     company = models.CharField(blank=True, max_length=100)
@@ -32,9 +34,10 @@ class Customer(models.Model):
     shipping_city = models.CharField(blank=True, max_length=64)
     shipping_postcode = models.CharField(blank=True, max_length=6)
     shipping_country = models.CharField(blank=True, max_length=64)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{ self.first_name } { self.last_name }"
+        return f"{ self.user }'s customer: { self.first_name } { self.last_name }"
 
 
 class CustomerContactForm(ModelForm):
@@ -80,14 +83,27 @@ class CustomerShippingForm(ModelForm):
         }
 
 
-# class Warehouse(models.Model):
-#     branch = models.CharField(max_length=64)
+class Warehouse(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="warehouses")
+    warehouse = models.CharField(max_length=64)
 
-#     def __str__(self):
-#         return f"{ self.branch }"
+    def __str__(self):
+        return f"{ self.warehouse }"
+
+
+class WarehouseForm(ModelForm):
+    class Meta:
+        model = Warehouse
+        fields = ['warehouse']
+        widgets = {
+            'warehouse': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 
 # class ProductCategory(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="categories")
 #     category = models.CharField(max_length=64)
 
 #     def __str__(self):
@@ -95,6 +111,8 @@ class CustomerShippingForm(ModelForm):
 
 
 # class SalesChannel(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="sales_channels")
 #     channel = models.CharField(max_length=64)
 
 #     def __str__(self):
@@ -102,6 +120,8 @@ class CustomerShippingForm(ModelForm):
 
 
 # class Product(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="products")
 #     name = models.CharField(max_length=100)
 #     code = models.CharField(blank=True, max_length=20)
 #     barcode = models.CharField(blank=True, max_length=32)
@@ -118,6 +138,8 @@ class CustomerShippingForm(ModelForm):
 
 
 # class SalesOrder(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="sales_orders")
 #     created_date = models.DateField(default=date.today)
 #     invoice_date = models.DateField(default=date.today)
 #     invoice_number = models.IntegerField()
@@ -130,11 +152,11 @@ class CustomerShippingForm(ModelForm):
 #     timestamp = models.DateTimeField(auto_now_add=True)
 
 #     def __str__(self):
-#         return f"Order No. { self.id } with Ref { self.reference }"
+#         return f"Order No. { self.id } with ref #{ self.reference }"
 
 
 # class Item(models.Model):
-#     order = models.ForeignKey(
+#     sales_order = models.ForeignKey(
 #         SalesOrder, on_delete=models.CASCADE, related_name="items")
 #     product = models.ForeignKey(Product, on_delete=models.PROTECT)
 #     quantity = models.DecimalField(
@@ -151,7 +173,12 @@ class CustomerShippingForm(ModelForm):
 
 
 # class Shelf(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="shelves")
 #     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
 #     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 #     quantity = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=1)
+#         max_digits=19, decimal_places=10, default=0)
+
+#     def __str__(self):
+#         return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"
