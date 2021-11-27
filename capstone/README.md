@@ -17,3 +17,7 @@ Key features:
 
 ## Future Improvements
 - Style pagination colors
+
+## References:
+- How to dynamically filter ModelChoice's queryset in a ModelForm? [https://simpleisbetterthancomplex.com/questions/2017/03/22/how-to-dynamically-filter-modelchoices-queryset-in-a-modelform.html]
+

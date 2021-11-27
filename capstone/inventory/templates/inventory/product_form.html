@@ -1,0 +1,23 @@
+{% extends 'inventory/layout.html' %}
+
+{% block title %}
+    Create A New Product
+{% endblock %}
+
+{% block body %}
+    {% if title %}
+        <h2>{{ title }}</h2>
+    {% else %}
+        <h2>Create A New Product</h2>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <div class="pt-2 pb-2 mb-3 border-top">
+            <a class="btn btn-primary btn-sm" href="{% url 'product' %}">Cancel</a>
+            <input class="btn btn-primary btn-sm" type="submit" value="Save">
+        </div>
+    </form>
+
+{% endblock %}

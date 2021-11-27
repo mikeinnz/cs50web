@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.base import Model
 from django.db.models.deletion import CASCADE, DO_NOTHING
 from django.forms import ModelForm, widgets
 
@@ -110,6 +111,15 @@ class ProductCategory(models.Model):
         return f"{ self.category }"
 
 
+class ProductCategoryForm(ModelForm):
+    class Meta:
+        model = ProductCategory
+        fields = ['category']
+        widgets = {
+            'category': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
+        }
+
+
 class SalesChannel(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="sales_channels")
@@ -123,7 +133,7 @@ class Product(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="products")
     name = models.CharField(max_length=100)
-    code = models.CharField(blank=True, max_length=20)
+    sku = models.CharField(blank=True, max_length=20)
     barcode = models.CharField(blank=True, max_length=32)
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     batch = models.CharField(max_length=20)
@@ -137,49 +147,70 @@ class Product(models.Model):
         return f"{ self.name }"
 
 
-class SalesOrder(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="sales_orders")
-    created_date = models.DateField(default=date.today)
-    invoice_date = models.DateField(default=date.today)
-    invoice_number = models.IntegerField()
-    reference = models.CharField(max_length=32)
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name="orders")
-    tracking = models.CharField(max_length=256, blank=True)
-    status = models.CharField(max_length=32, choices=STATUS_CHOICES)
-    saleschannel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
-    timestamp = models.DateTimeField(auto_now_add=True)
+class ProductForm(ModelForm):
+    class Meta:
+        model = Product
+        exclude = ['user']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
+            'sku': forms.TextInput(attrs={'class': 'form-control'}),
+            'barcode': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'batch': forms.TextInput(attrs={'class': 'form-control'}),
+            'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'value': date.today}),
+            'unit_cost': forms.NumberInput(attrs={'class': 'form-control'}),
+            'retail_price': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
 
-    def __str__(self):
-        return f"Order No. { self.id } with ref #{ self.reference }"
-
-
-class SalesItem(models.Model):
-    sales_order = models.ForeignKey(
-        SalesOrder, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity = models.DecimalField(
-        max_digits=19, decimal_places=10, default=1)
-    price = models.DecimalField(
-        max_digits=19, decimal_places=10, default=1)
-    discount = models.DecimalField(max_digits=3, decimal_places=2, default=0)
-
-    def sub_total(self):
-        return self.quantity * (1 - self.discount) * self.price
-
-    def __str__(self):
-        return f"Item: { self.quantity } x { self.product }"
+    def __init__(self, user, *args, **kwargs):
+        super(ProductForm, self).__init__(*args, **kwargs)
+        self.fields['category'].queryset = ProductCategory.objects.filter(
+            user=user)
 
 
-class Shelf(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="shelves")
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.DecimalField(
-        max_digits=19, decimal_places=10, default=0)
+# class SalesOrder(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="sales_orders")
+#     created_date = models.DateField(default=date.today)
+#     invoice_date = models.DateField(default=date.today)
+#     invoice_number = models.IntegerField()
+#     reference = models.CharField(max_length=32)
+#     customer = models.ForeignKey(
+#         Customer, on_delete=models.CASCADE, related_name="orders")
+#     tracking = models.CharField(max_length=256, blank=True)
+#     status = models.CharField(max_length=32, choices=STATUS_CHOICES)
+#     saleschannel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
+#     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
+#     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"
+#     def __str__(self):
+#         return f"Order No. { self.id } with ref #{ self.reference }"
+
+
+# class SalesItem(models.Model):
+#     sales_order = models.ForeignKey(
+#         SalesOrder, on_delete=models.CASCADE, related_name="items")
+#     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+#     quantity = models.DecimalField(
+#         max_digits=19, decimal_places=10, default=1)
+#     price = models.DecimalField(
+#         max_digits=19, decimal_places=10, default=1)
+#     discount = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+
+#     def sub_total(self):
+#         return self.quantity * (1 - self.discount) * self.price
+
+#     def __str__(self):
+#         return f"Item: { self.quantity } x { self.product }"
+
+
+# class Shelf(models.Model):
+#     user = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name="shelves")
+#     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+#     quantity = models.DecimalField(
+#         max_digits=19, decimal_places=10, default=0)
+
+#     def __str__(self):
+#         return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"

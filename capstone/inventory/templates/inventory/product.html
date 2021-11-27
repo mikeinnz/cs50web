@@ -22,7 +22,7 @@
                     <tr class="table-striped">
                         <th scope="col">Product</th>
                         <th scope="col">Category</th>
-                        <th scope="col">Code</th>
+                        <th scope="col">SKU</th>
                         <th scope="col">Barcode</th>
                         <th scope="col">Batch</th>
                         <th scope="col">Expiry</th>
@@ -36,7 +36,7 @@
                         <tr class="table-striped">
                             <td><a class="edit-link" href="{% url 'edit_product' product.id %}">{{ product.name }}</a></td>
                             <td>{{ product.category }}</td>
-                            <td>{{ product.code }}</td>
+                            <td>{{ product.sku }}</td>
                             <td>{{ product.barcode }}</td>
                             <td>{{ product.batch }}</td>
                             <td>{{ product.expiry }}</td>

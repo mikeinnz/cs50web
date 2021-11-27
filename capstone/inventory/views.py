@@ -119,14 +119,20 @@ def edit_warehouse(request, id):
 
 @login_required
 def product(request):
-    return render(request, "inventory/product.html", {
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
 
+    products = Product.objects.filter(user=request.user).order_by('name')
+    return render(request, "inventory/product.html", {
+        'products': products,
     })
 
 
 @login_required
 def create_product(request):
-    return HttpResponse("create product")
+    return render(request, "inventory/product_form.html", {
+        'form': ProductForm(request.user),
+    })
 
 
 @login_required
@@ -136,7 +142,21 @@ def edit_product(request):
 
 @login_required
 def create_category(request):
-    return HttpResponse("create category")
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
+
+    if request.method == "POST":
+        category = ProductCategory(user=request.user)
+        category_form = ProductCategoryForm(
+            request.POST or None, instance=category)
+        if category_form.is_valid:
+            category_form.save()
+        return HttpResponseRedirect(reverse("product"))
+
+    else:
+        return render(request, "inventory/category_form.html", {
+            "form": ProductCategoryForm()
+        })
 
 
 @login_required
