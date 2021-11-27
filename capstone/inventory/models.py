@@ -101,84 +101,85 @@ class WarehouseForm(ModelForm):
         }
 
 
-# class ProductCategory(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="categories")
-#     category = models.CharField(max_length=64)
+class ProductCategory(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="categories")
+    category = models.CharField(max_length=64)
 
-#     def __str__(self):
-#         return f"{ self.category }"
-
-
-# class SalesChannel(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="sales_channels")
-#     channel = models.CharField(max_length=64)
-
-#     def __str__(self):
-#         return f"{ self.channel }"
+    def __str__(self):
+        return f"{ self.category }"
 
 
-# class Product(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="products")
-#     name = models.CharField(max_length=100)
-#     code = models.CharField(blank=True, max_length=20)
-#     barcode = models.CharField(blank=True, max_length=32)
-#     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
-#     batch = models.CharField(max_length=20)
-#     expiry_date = models.DateField(blank=True)
-#     unit_cost = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=0)
-#     retail_price = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=1)
+class SalesChannel(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="sales_channels")
+    channel = models.CharField(max_length=64)
 
-#     def __str__(self):
-#         return f"{ self.name }"
+    def __str__(self):
+        return f"{ self.channel }"
 
 
-# class SalesOrder(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="sales_orders")
-#     created_date = models.DateField(default=date.today)
-#     invoice_date = models.DateField(default=date.today)
-#     invoice_number = models.IntegerField()
-#     reference = models.CharField(max_length=32)
-#     customer = models.ForeignKey(
-#         Customer, on_delete=models.CASCADE, related_name="orders")
-#     status = models.CharField(max_length=32, choices=STATUS_CHOICES)
-#     saleschannel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
-#     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
-#     timestamp = models.DateTimeField(auto_now_add=True)
+class Product(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="products")
+    name = models.CharField(max_length=100)
+    code = models.CharField(blank=True, max_length=20)
+    barcode = models.CharField(blank=True, max_length=32)
+    category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
+    batch = models.CharField(max_length=20)
+    expiry_date = models.DateField(blank=True)
+    unit_cost = models.DecimalField(
+        max_digits=19, decimal_places=10, default=0)
+    retail_price = models.DecimalField(
+        max_digits=19, decimal_places=10, default=1)
 
-#     def __str__(self):
-#         return f"Order No. { self.id } with ref #{ self.reference }"
-
-
-# class Item(models.Model):
-#     sales_order = models.ForeignKey(
-#         SalesOrder, on_delete=models.CASCADE, related_name="items")
-#     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-#     quantity = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=1)
-#     price = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=1)
-#     discount = models.DecimalField(max_digits=3, decimal_places=2, default=0)
-
-#     def sub_total(self):
-#         return self.quantity * (1 - self.discount) * self.price
-
-#     def __str__(self):
-#         return f"Item: { self.quantity } x { self.product }"
+    def __str__(self):
+        return f"{ self.name }"
 
 
-# class Shelf(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="shelves")
-#     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=0)
+class SalesOrder(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="sales_orders")
+    created_date = models.DateField(default=date.today)
+    invoice_date = models.DateField(default=date.today)
+    invoice_number = models.IntegerField()
+    reference = models.CharField(max_length=32)
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="orders")
+    tracking = models.CharField(max_length=256, blank=True)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES)
+    saleschannel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"
+    def __str__(self):
+        return f"Order No. { self.id } with ref #{ self.reference }"
+
+
+class SalesItem(models.Model):
+    sales_order = models.ForeignKey(
+        SalesOrder, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.DecimalField(
+        max_digits=19, decimal_places=10, default=1)
+    price = models.DecimalField(
+        max_digits=19, decimal_places=10, default=1)
+    discount = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+
+    def sub_total(self):
+        return self.quantity * (1 - self.discount) * self.price
+
+    def __str__(self):
+        return f"Item: { self.quantity } x { self.product }"
+
+
+class Shelf(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="shelves")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.DecimalField(
+        max_digits=19, decimal_places=10, default=0)
+
+    def __str__(self):
+        return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"

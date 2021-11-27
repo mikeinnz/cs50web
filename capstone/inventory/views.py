@@ -112,5 +112,50 @@ def edit_warehouse(request, id):
 
     else:
         return render(request, "inventory/warehouse_form.html", {
+            "title": "Edit Warehouse",
             "form": WarehouseForm(instance=warehouse)
         })
+
+
+@login_required
+def product(request):
+    return render(request, "inventory/product.html", {
+
+    })
+
+
+@login_required
+def create_product(request):
+    return HttpResponse("create product")
+
+
+@login_required
+def edit_product(request):
+    return HttpResponse("edit product")
+
+
+@login_required
+def create_category(request):
+    return HttpResponse("create category")
+
+
+@login_required
+def order(request):
+    return render(request, "inventory/sales_order.html", {
+
+    })
+
+
+@login_required
+def create_order(request):
+    return HttpResponse("create sales order")
+
+
+@login_required
+def edit_order(request):
+    return HttpResponse("edit order")
+
+
+@login_required
+def create_sales_channel(request):
+    return HttpResponse("create channel")

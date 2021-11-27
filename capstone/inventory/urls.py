@@ -10,4 +10,12 @@ urlpatterns = [
     path('warehouse/list', views.warehouse, name="warehouse"),
     path('warehouse/new', views.create_warehouse, name="create_warehouse"),
     path('warehouse/edit/<int:id>', views.edit_warehouse, name="edit_warehouse"),
+    path('product/list', views.product, name="product"),
+    path('product/new', views.create_product, name="create_product"),
+    path('product/edit/<int:id>', views.edit_product, name="edit_product"),
+    path('category/new', views.create_category, name="create_category"),
+    path('order/list', views.order, name="order"),
+    path('order/new', views.create_order, name="create_order"),
+    path('order/edit/<int:id>', views.edit_order, name="edit_order"),
+    path('channel/new', views.create_sales_channel, name="create_sales_channel"),
 ]
