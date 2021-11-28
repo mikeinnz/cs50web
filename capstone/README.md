@@ -17,6 +17,10 @@ Key features:
 
 ## Future Improvements
 - Add filter and sorting to Warehouses using list.js or django-filter
+- Report: View by product, add product view
+
+
+
 
 ## References:
 - How to dynamically filter ModelChoice's queryset in a ModelForm? [https://simpleisbetterthancomplex.com/questions/2017/03/22/how-to-dynamically-filter-modelchoices-queryset-in-a-modelform.html]

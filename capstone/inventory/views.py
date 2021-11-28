@@ -14,6 +14,9 @@ def index(request):
 
 @login_required
 def create_customer(request):
+    """
+    Create a new customer
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
@@ -33,6 +36,9 @@ def create_customer(request):
 
 @login_required
 def list_customer(request):
+    """
+    View a list of customers
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
@@ -46,6 +52,9 @@ def list_customer(request):
 
 @login_required
 def edit_customer(request, id):
+    """
+    Edit a customer
+    """
     try:
         customer = Customer.objects.get(pk=id)
     except Customer.DoesNotExist:
@@ -164,6 +173,9 @@ def view_warehouse(request, id):
 
 @login_required
 def product(request):
+    """
+    View a list of products
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
@@ -175,6 +187,9 @@ def product(request):
 
 @login_required
 def create_product(request):
+    """
+    Create a new product
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
@@ -194,6 +209,9 @@ def create_product(request):
 
 @login_required
 def edit_product(request, id):
+    """
+    Edit a product
+    """
     try:
         product = Product.objects.get(pk=id)
     except Product.DoesNotExist:
@@ -219,6 +237,9 @@ def edit_product(request, id):
 
 @login_required
 def create_category(request):
+    """
+    Create a new category
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
@@ -239,6 +260,9 @@ def create_category(request):
 
 @login_required
 def edit_category(request, id):
+    """
+    Edit a category (name only)
+    """
     try:
         category = ProductCategory.objects.get(pk=id)
     except ProductCategory.DoesNotExist:
@@ -264,6 +288,9 @@ def edit_category(request, id):
 
 @login_required
 def order(request):
+    """
+    View Sales Orders
+    """
     return render(request, "inventory/sales_order.html", {
 
     })
@@ -271,6 +298,9 @@ def order(request):
 
 @login_required
 def create_order(request):
+    """
+    Create a new sales order
+    """
     return HttpResponse("create sales order")
 
 
