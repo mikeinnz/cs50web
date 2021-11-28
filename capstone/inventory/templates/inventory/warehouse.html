@@ -5,14 +5,21 @@
 {% endblock %}
 
 {% block body %}
-    <h2> Warehouses</h2>
+    {% if view %}
+        <h2>Viewing Warehouse</h2>
+        <div class="d-flex justify-content-start border-top pt-2">
+            <a class="btn btn-sm btn-primary" href="{% url 'warehouse' %}">Back</a>
+        </div>
+    {% else %}
+        <h2>Warehouses</h2>
+        <div class="d-flex justify-content-end border-top pt-2">
+            <a class="btn btn-sm btn-primary" href="{% url 'create_warehouse' %}">Create A New Warehouse</a>
+        </div>
+    {% endif %}
 
-    <div class="d-flex justify-content-end border-top p-2">
-        <a class="btn btn-sm btn-primary" href="{% url 'create_warehouse' %}">Create A New Warehouse</a>
-    </div>
 
 
-    {% if not warehouses%}
+    {% if not warehouses %}
         <span class="pagination">No warehouse.</span>
     {% else %}
         <div class="table-responsive-md">
@@ -26,12 +33,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for warehouse in warehouses %}
+                    {% for shelf in shelves %}
                         <tr class="table-striped">
-                            <td><a class="edit-link" href="{% url 'edit_warehouse' warehouse.id %}">{{ warehouse.warehouse }}</a></td>
-                            <td>{{ warehouse.warehouse }}</td>
-                            <td>{{ warehouse.warehouse }}</td>
-                            <td>{{ warehouse.warehouse }}</td>
+                            <td>
+                                {% if view %}
+                                    {{ shelf.warehouse }}
+                                {% else %}
+                                    <a class="text-decoration-none" href="{% url 'view_warehouse' shelf.warehouse.id %}">{{ shelf.warehouse }}</a>
+                                {% endif %}
+                                 | <a class="edit-link fw-light" href="{% url 'edit_warehouse' shelf.warehouse.id %}">Edit</a>
+                            </td>
+                            <td>{{ shelf.product.category }}</td>
+                            <td>{{ shelf.product.name }}</td>
+                            <td>{{ shelf.quantity|floatformat:0 }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

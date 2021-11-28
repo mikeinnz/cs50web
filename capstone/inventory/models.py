@@ -205,13 +205,13 @@ class ProductForm(ModelForm):
 #         return f"Item: { self.quantity } x { self.product }"
 
 
-# class Shelf(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="shelves")
-#     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=0)
+class Shelf(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="shelves")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.DecimalField(
+        max_digits=19, decimal_places=10, default=0)
 
-#     def __str__(self):
-#         return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"
+    def __str__(self):
+        return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"

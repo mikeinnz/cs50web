@@ -70,18 +70,28 @@ def edit_customer(request, id):
 
 @login_required
 def warehouse(request):
+    """
+    View all warehouses' inventory
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
     warehouses = Warehouse.objects.filter(
         user=request.user).order_by('warehouse')
+
+    shelves = Shelf.objects.filter(
+        user=request.user).order_by('warehouse')
     return render(request, "inventory/warehouse.html", {
-        'warehouses': warehouses
+        'warehouses': warehouses,
+        'shelves': shelves
     })
 
 
 @login_required
 def create_warehouse(request):
+    """
+    Create a new warehouse (name only)
+    """
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
@@ -101,6 +111,12 @@ def create_warehouse(request):
 
 @login_required
 def edit_warehouse(request, id):
+    """
+    Edit a warehouse (name only)
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
+
     try:
         warehouse = Warehouse.objects.get(pk=id)
     except Warehouse.DoesNotExist:
@@ -122,6 +138,28 @@ def edit_warehouse(request, id):
             "edit": True,
             "form": WarehouseForm(instance=warehouse)
         })
+
+
+@login_required
+def view_warehouse(request, id):
+    """
+    View a specified warehouse's inventory
+    """
+    try:
+        warehouse = Warehouse.objects.get(pk=id)
+    except Warehouse.DoesNotExist:
+        return JsonResponse({"error": "Warehouse not found."}, status=404)
+
+    if warehouse not in request.user.warehouses.all():
+        # TODO: show message instead of JsonResponse
+        return JsonResponse({"error": "Access denined."}, status=404)
+
+    shelves = Shelf.objects.filter(user=request.user, warehouse=warehouse)
+    return render(request, "inventory/warehouse.html", {
+        'warehouses': warehouse,
+        'shelves': shelves,
+        'view': True
+    })
 
 
 @login_required
