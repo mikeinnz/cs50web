@@ -13,7 +13,7 @@
     </div>
 
 
-    {% if not products%}
+    {% if not page_obj.object_list %}
         <span class="pagination">No product.</span>
     {% else %}
         <div class="table-responsive-md">
@@ -32,20 +32,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for product in products %}
+                    {% for product in page_obj %}
                         <tr class="table-striped">
                             <td><a class="edit-link" href="{% url 'edit_product' product.id %}">{{ product.name }}</a></td>
                             <td>{{ product.category }}</td>
                             <td>{{ product.sku }}</td>
                             <td>{{ product.barcode }}</td>
                             <td>{{ product.batch }}</td>
-                            <td>{{ product.expiry }}</td>
-                            <td>{{ product.unit_cost }}</td>
-                            <td>{{ product.retail_price }}</td>
+                            <td>{{ product.expiry_date }}</td>
+                            <td>{{ product.unit_cost|floatformat:2}}</td>
+                            <td>{{ product.retail_price|floatformat:2 }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        {% include 'inventory/pagination.html' %}
     {% endif %}
 {% endblock %}

@@ -137,7 +137,7 @@ class Product(models.Model):
     barcode = models.CharField(blank=True, max_length=32)
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
     batch = models.CharField(max_length=20)
-    expiry_date = models.DateField(blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
     unit_cost = models.DecimalField(
         max_digits=19, decimal_places=10, default=0)
     retail_price = models.DecimalField(
@@ -155,9 +155,9 @@ class ProductForm(ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
             'sku': forms.TextInput(attrs={'class': 'form-control'}),
             'barcode': forms.TextInput(attrs={'class': 'form-control'}),
-            'category': forms.Select(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
             'batch': forms.TextInput(attrs={'class': 'form-control'}),
-            'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'value': date.today}),
+            'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'unit_cost': forms.NumberInput(attrs={'class': 'form-control'}),
             'retail_price': forms.NumberInput(attrs={'class': 'form-control'}),
         }

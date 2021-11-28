@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import *
-from .util import paginate_customers, save_customer
+from .util import paginate_items, save_customer
 
 
 def index(request):
@@ -40,7 +40,7 @@ def list_customer(request):
         user=request.user).order_by('first_name')
 
     return render(request, "inventory/customer_list.html", {
-        "page_obj": paginate_customers(request, customers)
+        "page_obj": paginate_items(request, customers)
     })
 
 
@@ -131,20 +131,52 @@ def product(request):
 
     products = Product.objects.filter(user=request.user).order_by('name')
     return render(request, "inventory/product.html", {
-        'products': products,
+        'page_obj': paginate_items(request, products),
     })
 
 
 @login_required
 def create_product(request):
-    return render(request, "inventory/product_form.html", {
-        'form': ProductForm(request.user),
-    })
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
+
+    if request.method == "POST":
+        product = Product(user=request.user)
+        product_form = ProductForm(
+            request.user, request.POST or None, instance=product)
+        if product_form.is_valid:
+            product_form.save()
+        return HttpResponseRedirect(reverse("product"))
+
+    else:
+        return render(request, "inventory/product_form.html", {
+            'form': ProductForm(request.user),
+        })
 
 
 @login_required
-def edit_product(request):
-    return HttpResponse("edit product")
+def edit_product(request, id):
+    try:
+        product = Product.objects.get(pk=id)
+    except Product.DoesNotExist:
+        return JsonResponse({"error": "Product not found."}, status=404)
+
+    if product not in request.user.products.all():
+        # TODO: show message instead of JsonResponse
+        return JsonResponse({"error": "Access denined."}, status=404)
+
+    if request.method == "POST":
+        product_form = ProductForm(request.user,
+                                   request.POST or None, instance=product)
+        if product_form.is_valid:
+            product_form.save()
+        return HttpResponseRedirect(reverse("product"))
+
+    else:
+        return render(request, "inventory/product_form.html", {
+            "edit": True,
+            "form": ProductForm(request.user, instance=product)
+        })
 
 
 @login_required

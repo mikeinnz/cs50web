@@ -2,15 +2,15 @@ from django.core.paginator import Paginator
 from .models import CustomerContactForm, CustomerBillingForm, CustomerShippingForm
 
 
-# Number of posts per page
-CUSTOMER_PER_PAGE = 10
+# Number of items per page
+ITEMS_PER_PAGE = 2
 
 
-def paginate_customers(request, customers):
+def paginate_items(request, items):
     """
-    Paginating customers
+    Paginating items
     """
-    paginator = Paginator(customers, CUSTOMER_PER_PAGE)
+    paginator = Paginator(items, ITEMS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj
