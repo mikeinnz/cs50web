@@ -11,12 +11,12 @@
         <h2>Create A New Product</h2>
     {% endif %}
 
-    <form method="post">
+    <form method="post" class="border-top pt-2">
         {% csrf_token %}
         <div class="col-12 col-lg-6 col-md-9 col-sm-10">
             {{ form }}
         </div>
-        <div class="pt-2 pb-2 mb-3 border-top">
+        <div class="pt-2 pb-2 mb-3 border-bottom">
             <a class="btn btn-primary btn-sm" href="{% url 'product' %}">Cancel</a>
             <input class="btn btn-primary btn-sm" type="submit" value="Save">
         </div>

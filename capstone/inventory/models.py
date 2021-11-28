@@ -157,7 +157,7 @@ class ProductForm(ModelForm):
             'barcode': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
             'batch': forms.TextInput(attrs={'class': 'form-control'}),
-            'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'value': date.today}),
+            'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'value': date.today}),
             'unit_cost': forms.NumberInput(attrs={'class': 'form-control'}),
             'retail_price': forms.NumberInput(attrs={'class': 'form-control'}),
         }

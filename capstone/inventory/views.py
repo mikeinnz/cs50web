@@ -158,7 +158,7 @@ def create_category(request):
             request.POST or None, instance=category)
         if category_form.is_valid:
             category_form.save()
-        return HttpResponseRedirect(reverse("product"))
+        return HttpResponseRedirect(reverse("create_category"))
 
     else:
         return render(request, "inventory/category_form.html", {
