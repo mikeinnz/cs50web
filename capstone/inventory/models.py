@@ -162,6 +162,7 @@ class ProductForm(ModelForm):
             'retail_price': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
+    # dynamically filter Category belonging to the current user
     def __init__(self, user, *args, **kwargs):
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['category'].queryset = ProductCategory.objects.filter(

@@ -5,19 +5,32 @@
 {% endblock %}
 
 {% block body %}
-    {% if title %}
-        <h2>{{ title }}</h2>
+    {% if edit %}
+        <h2>Edit Category</h2>
     {% else %}
         <h2>Create A New Category</h2>
     {% endif %}
 
     <form method="post">
         {% csrf_token %}
-        {{ form }}
-        <div class="pt-2 pb-2 mb-3 border-top">
+        <div class="col-12 col-lg-6 col-md-9 col-sm-10">
+            {{ form }}
+        </div>
+        <div class="pt-2 pb-2 mb-3 border-bottom">
             <a class="btn btn-primary btn-sm" href="{% url 'product' %}">Cancel</a>
             <input class="btn btn-primary btn-sm" type="submit" value="Save">
         </div>
     </form>
+
+    {% if not edit %}
+        <div class="col-12 col-lg-6 col-md-9 col-sm-10">
+            <h4>Available Categories</h4>
+            <ul class="list-group">
+                {% for category in categories %}
+                    <li class="list-group-item"><a class="edit-link" href="{% url 'edit_category' category.id %}">{{ category }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
 {% endblock %}

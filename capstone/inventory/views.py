@@ -46,11 +46,14 @@ def list_customer(request):
 
 @login_required
 def edit_customer(request, id):
-
     try:
         customer = Customer.objects.get(pk=id)
     except Customer.DoesNotExist:
         return JsonResponse({"error": "Customer not found."}, status=404)
+
+    if customer not in request.user.customers.all():
+        # TODO: show message instead of JsonResponse
+        return JsonResponse({"error": "Access denined."}, status=404)
 
     if request.method == "POST":
         save_customer(request, customer)
@@ -58,7 +61,7 @@ def edit_customer(request, id):
 
     else:
         return render(request, "inventory/customer_form.html", {
-            'title': "Edit Customer",
+            'edit': True,
             'contact_form': CustomerContactForm(instance=customer),
             'billing_form': CustomerBillingForm(instance=customer),
             'shipping_form': CustomerShippingForm(instance=customer)
@@ -101,7 +104,11 @@ def edit_warehouse(request, id):
     try:
         warehouse = Warehouse.objects.get(pk=id)
     except Warehouse.DoesNotExist:
-        JsonResponse({"error": "Warehouse not found."}, status=404)
+        return JsonResponse({"error": "Warehouse not found."}, status=404)
+
+    if warehouse not in request.user.warehouses.all():
+        # TODO: show message instead of JsonResponse
+        return JsonResponse({"error": "Access denined."}, status=404)
 
     if request.method == "POST":
         warehouse_form = WarehouseForm(
@@ -112,7 +119,7 @@ def edit_warehouse(request, id):
 
     else:
         return render(request, "inventory/warehouse_form.html", {
-            "title": "Edit Warehouse",
+            "edit": True,
             "form": WarehouseForm(instance=warehouse)
         })
 
@@ -155,7 +162,33 @@ def create_category(request):
 
     else:
         return render(request, "inventory/category_form.html", {
-            "form": ProductCategoryForm()
+            "form": ProductCategoryForm(),
+            'categories': ProductCategory.objects.filter(user=request.user)
+        })
+
+
+@login_required
+def edit_category(request, id):
+    try:
+        category = ProductCategory.objects.get(pk=id)
+    except ProductCategory.DoesNotExist:
+        return JsonResponse({"error": "Category not found."}, status=404)
+
+    if category not in request.user.categories.all():
+        # TODO: show message instead of JsonResponse
+        return JsonResponse({"error": "Access denined."}, status=404)
+
+    if request.method == "POST":
+        category_form = ProductCategoryForm(
+            request.POST or None, instance=category)
+        if category_form.is_valid:
+            category_form.save()
+        return HttpResponseRedirect(reverse("create_category"))
+
+    else:
+        return render(request, "inventory/category_form.html", {
+            "edit": True,
+            "form": ProductCategoryForm(instance=category)
         })
 
 
