@@ -8,15 +8,6 @@ from django.forms import ModelForm, widgets
 from datetime import date
 
 
-STATUS_CHOICES = [
-    ('DRAFT', 'Draft'),
-    ('CREATED', 'Created'),
-    ('INVOICED', 'Invoiced'),
-    ('DISPATCHED', 'Dispatched'),
-    ('PAID', 'Paid')
-]
-
-
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=CASCADE, related_name="customers")
     first_name = models.CharField(max_length=50)
@@ -169,40 +160,88 @@ class ProductForm(ModelForm):
             user=user)
 
 
-# class SalesOrder(models.Model):
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name="sales_orders")
-#     created_date = models.DateField(default=date.today)
-#     invoice_date = models.DateField(default=date.today)
-#     invoice_number = models.IntegerField()
-#     reference = models.CharField(max_length=32)
-#     customer = models.ForeignKey(
-#         Customer, on_delete=models.CASCADE, related_name="orders")
-#     tracking = models.CharField(max_length=256, blank=True)
-#     status = models.CharField(max_length=32, choices=STATUS_CHOICES)
-#     saleschannel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
-#     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
-#     timestamp = models.DateTimeField(auto_now_add=True)
+class SalesOrder(models.Model):
+    STATUS_CHOICES = [
+        ('DRAFT', 'Draft'),
+        ('CREATED', 'Created'),
+        ('INVOICED', 'Invoiced'),
+        ('DISPATCHED', 'Dispatched'),
+        ('PAID', 'Paid')
+    ]
 
-#     def __str__(self):
-#         return f"Order No. { self.id } with ref #{ self.reference }"
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="sales_orders")
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="orders")
+    created_date = models.DateField(default=date.today)
+    invoice_date = models.DateField(default=date.today)
+    invoice_number = models.IntegerField()
+    channel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
+    tracking = models.CharField(max_length=256, blank=True)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
+    status = models.CharField(
+        max_length=32, choices=STATUS_CHOICES, default="DRAFT")
+    reference = models.CharField(max_length=32)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order No. { self.id } with ref #{ self.reference }"
 
 
-# class SalesItem(models.Model):
-#     sales_order = models.ForeignKey(
-#         SalesOrder, on_delete=models.CASCADE, related_name="items")
-#     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-#     quantity = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=1)
-#     price = models.DecimalField(
-#         max_digits=19, decimal_places=10, default=1)
-#     discount = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+class SalesOrderForm(ModelForm):
+    class Meta:
+        model = SalesOrder
+        exclude = ['user', 'invoice_number', 'timestamp', 'customer']
+        widgets = {
+            'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'invoice_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'reference': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'customer': forms.Select(attrs={'class': 'form-select'}),
+            'tracking': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'channel': forms.Select(attrs={'class': 'form-select'}),
+            'warehouse': forms.Select(attrs={'class': 'form-select col-auto'}),
+        }
 
-#     def sub_total(self):
-#         return self.quantity * (1 - self.discount) * self.price
+    def __init__(self, user, *args, **kwargs):
+        super(SalesOrderForm, self).__init__(*args, **kwargs)
+        # self.fields['customer'].queryset = Customer.objects.filter(user=user)
+        self.fields['channel'].queryset = SalesChannel.objects.filter(
+            user=user)
+        self.fields['warehouse'].queryset = Warehouse.objects.filter(user=user)
 
-#     def __str__(self):
-#         return f"Item: { self.quantity } x { self.product }"
+
+class SalesItem(models.Model):
+    order = models.ForeignKey(
+        SalesOrder, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.DecimalField(
+        max_digits=19, decimal_places=10, default=1)
+    price = models.DecimalField(
+        max_digits=19, decimal_places=10, default=1)
+    discount = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+
+    def sub_total(self):
+        return self.quantity * (1 - self.discount) * self.price
+
+    def __str__(self):
+        return f"Item: { self.quantity } x { self.product }"
+
+
+class SalesItemForm(ModelForm):
+    class Meta:
+        model = SalesItem
+        exclude = ['order']
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-select'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'discount': forms.NumberInput(attrs={'class': 'form-control'})
+        }
+
+    def __init__(self, user, *args, **kwargs):
+        super(SalesItemForm, self).__init__(*args, **kwargs)
+        self.fields['product'].queryset = Product.objects.filter(user=user)
 
 
 class Shelf(models.Model):

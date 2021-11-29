@@ -301,7 +301,13 @@ def create_order(request):
     """
     Create a new sales order
     """
-    return HttpResponse("create sales order")
+    return render(request, "inventory/sales_order_form.html", {
+        'contact_form': CustomerContactForm(),
+        'billing_form': CustomerBillingForm(),
+        'shipping_form': CustomerShippingForm(),
+        'order_form': SalesOrderForm(request.user),
+        'item_form': SalesItemForm(request.user)
+    })
 
 
 @login_required

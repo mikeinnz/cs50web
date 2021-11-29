@@ -13,54 +13,8 @@
         <h2>Create A New Customer</h2>
     {% endif %}
     <form method="post">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-top pt-2 pb-2 mb-3 border-top">
-            {% csrf_token %}
-            <div class="contact-form flex-grow-1 me-3">
-                <h4>Contact Details</h4>
-                {% for field in contact_form %}
-                    <div class="mb-1 row">
-                        <div class="form-label">
-                            {{ field.errors }}
-                            {{ field.label_tag }} 
-                        </div>
-                        <div>
-                            {{ field }}
-                        </div>
+        {% include 'inventory/customer_form_template.html' %}
 
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="billing-form flex-grow-1 me-3">
-                <h4>Billing Details</h4>
-                {% for field in billing_form %}
-                    <div class="mb-1 row">
-                        <div class="form-label">
-                            {{ field.errors }}
-                            {{ field.label_tag }} 
-                        </div>
-                        <div>
-                            {{ field }}
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="shipping-form flex-grow-1 me-3">
-                <h4>Shipping Details</h4>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="copy_billing">Same as billing</button>
-                {% for field in shipping_form %}
-                    <div class="mb-1 row">
-                        <div class="form-label">
-                            {{ field.errors }}
-                            {{ field.label_tag }} 
-                        </div>
-                        <div>
-                            {{ field }}
-                        </div>
-
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
         <a class="btn btn-primary btn-sm" href="{% url 'list_customer' %}">Cancel</a>
         <input class="btn btn-primary btn-sm" type="submit" value="Save">
     </form>

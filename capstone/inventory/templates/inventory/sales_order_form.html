@@ -1,0 +1,38 @@
+{% extends 'inventory/layout.html' %}
+
+{% block title %}
+    Create A New Sales Order
+{% endblock %}
+
+{% block body %}
+    <h2>Create A New Sales Order</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% include 'inventory/customer_form_template.html' %}
+
+        <div class="row gx-3 gy-2 align-items-center pt-2 pb-2 mb-3 border-top">
+            {% for field in order_form %}
+                <div class="col-sm-3">
+                    <div class="form-label">
+                        {{ field.errors }}
+                        {{ field.label_tag }} 
+                    </div>
+                    <div>
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div>
+            {{ item_form }}
+        </div>
+        <div class="pt-2 pb-2 mb-3 border-bottom">
+            <a class="btn btn-primary btn-sm" href="{% url 'order' %}">Cancel</a>
+            <input class="btn btn-primary btn-sm" type="submit" value="Save">
+        </div>
+    </form>
+
+
+{% endblock %}
