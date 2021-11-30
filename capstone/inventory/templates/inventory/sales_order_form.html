@@ -1,4 +1,5 @@
 {% extends 'inventory/layout.html' %}
+{% load static %}
 
 {% block title %}
     Create A New Sales Order
@@ -25,14 +26,25 @@
                 </div>
             {% endfor %}
         </div>
-        <div>
-            {{ item_form }}
+        <div class="d-flex justify-content-between">
+            {% for field in item_form %}
+                <div class="flex-grow-1 me-3">
+                    <div class="form-label">
+                        {{ field.errors }}
+                        {{ field.label }}
+                    </div>
+                    {{ field }}
+                </div>
+            {% endfor %}
         </div>
-        <div class="pt-2 pb-2 mb-3 border-bottom">
-            <a class="btn btn-primary btn-sm" href="{% url 'order' %}">Cancel</a>
-            <input class="btn btn-primary btn-sm" type="submit" value="Save">
+        <div class="pt-2 pb-2 mb-3">
+            <a class="btn btn-primary" href="{% url 'order' %}">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Save">
         </div>
     </form>
 
+{% endblock %}
 
+{% block script %}
+    <script src="{% static 'inventory/inventory.js' %}"></script>
 {% endblock %}

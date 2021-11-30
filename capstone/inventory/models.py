@@ -149,8 +149,8 @@ class ProductForm(ModelForm):
             'category': forms.Select(attrs={'class': 'form-select'}),
             'batch': forms.TextInput(attrs={'class': 'form-control'}),
             'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'unit_cost': forms.NumberInput(attrs={'class': 'form-control'}),
-            'retail_price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'unit_cost': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e-2'}),
+            'retail_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e-2'}),
         }
 
     # dynamically filter Category belonging to the current user
@@ -234,9 +234,9 @@ class SalesItemForm(ModelForm):
         exclude = ['order']
         widgets = {
             'product': forms.Select(attrs={'class': 'form-select'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control'}),
-            'discount': forms.NumberInput(attrs={'class': 'form-control'})
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
+            'discount': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'})
         }
 
     def __init__(self, user, *args, **kwargs):
