@@ -176,12 +176,13 @@ class SalesOrder(models.Model):
     created_date = models.DateField(default=date.today)
     invoice_date = models.DateField(default=date.today)
     invoice_number = models.IntegerField()
-    channel = models.ForeignKey(SalesChannel, on_delete=models.PROTECT)
-    tracking = models.CharField(max_length=256, blank=True)
+    channel = models.ForeignKey(
+        SalesChannel, blank=True, null=True, on_delete=models.PROTECT)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
+    tracking = models.CharField(max_length=256, blank=True)
     status = models.CharField(
         max_length=32, choices=STATUS_CHOICES, default="DRAFT")
-    reference = models.CharField(max_length=32)
+    reference = models.CharField(max_length=32, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -191,12 +192,12 @@ class SalesOrder(models.Model):
 class SalesOrderForm(ModelForm):
     class Meta:
         model = SalesOrder
-        exclude = ['user', 'invoice_number', 'timestamp', 'customer']
+        exclude = ['user', 'invoice_number', 'timestamp']
         widgets = {
             'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'invoice_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'reference': forms.TextInput(attrs={'class': 'form-control'}),
-            # 'customer': forms.Select(attrs={'class': 'form-select'}),
+            'customer': forms.Select(attrs={'class': 'form-select'}),
             'tracking': forms.TextInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'channel': forms.Select(attrs={'class': 'form-select'}),
@@ -205,7 +206,7 @@ class SalesOrderForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super(SalesOrderForm, self).__init__(*args, **kwargs)
-        # self.fields['customer'].queryset = Customer.objects.filter(user=user)
+        self.fields['customer'].queryset = Customer.objects.filter(user=user)
         self.fields['channel'].queryset = SalesChannel.objects.filter(
             user=user)
         self.fields['warehouse'].queryset = Warehouse.objects.filter(user=user)
@@ -236,12 +237,15 @@ class SalesItemForm(ModelForm):
             'product': forms.Select(attrs={'class': 'form-select'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
-            'discount': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'})
+            'discount': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e-2'})
+        }
+        labels = {
+            'product': 'Product [Available]',
         }
 
-    def __init__(self, user, *args, **kwargs):
-        super(SalesItemForm, self).__init__(*args, **kwargs)
-        self.fields['product'].queryset = Product.objects.filter(user=user)
+    # def __init__(self, user, *args, **kwargs):
+    #     super(SalesItemForm, self).__init__(*args, **kwargs)
+    #     self.fields['product'].queryset = Product.objects.filter(user=user)
 
 
 class Shelf(models.Model):
@@ -254,3 +258,12 @@ class Shelf(models.Model):
 
     def __str__(self):
         return f"At { self.warehouse }, { self.user } has { self.quantity } x { self.product }"
+
+    def serialize(self):
+        return {
+            'user': self.user.username,
+            'warehouse': self.warehouse.warehouse,
+            'product_id': self.product.id,
+            'product': self.product.name,
+            'quantity': self.quantity,
+        }

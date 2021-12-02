@@ -1,5 +1,8 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models.query import QuerySet
+from django.forms import formset_factory, modelform_factory
+from django.forms.models import modelform_factory, modelformset_factory
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -172,6 +175,23 @@ def view_warehouse(request, id):
 
 
 @login_required
+def warehouse_api(request, id):
+    try:
+        warehouse = Warehouse.objects.get(pk=id)
+    except Warehouse.DoesNotExist:
+        return JsonResponse({"error": "Warehouse not found."}, status=404)
+
+    if warehouse not in request.user.warehouses.all():
+        # TODO: show message instead of JsonResponse
+        return JsonResponse({"error": "Access denined."}, status=404)
+
+    shelves = Shelf.objects.filter(
+        user=request.user, warehouse=warehouse)
+    # return JsonResponse({"shelves": list(shelves.values())})
+    return JsonResponse([shelf.serialize() for shelf in shelves], safe=False)
+
+
+@ login_required
 def product(request):
     """
     View a list of products
@@ -185,7 +205,7 @@ def product(request):
     })
 
 
-@login_required
+@ login_required
 def create_product(request):
     """
     Create a new product
@@ -207,7 +227,7 @@ def create_product(request):
         })
 
 
-@login_required
+@ login_required
 def edit_product(request, id):
     """
     Edit a product
@@ -235,7 +255,7 @@ def edit_product(request, id):
         })
 
 
-@login_required
+@ login_required
 def create_category(request):
     """
     Create a new category
@@ -258,7 +278,7 @@ def create_category(request):
         })
 
 
-@login_required
+@ login_required
 def edit_category(request, id):
     """
     Edit a category (name only)
@@ -286,35 +306,72 @@ def edit_category(request, id):
         })
 
 
-@login_required
+@ login_required
 def order(request):
     """
     View Sales Orders
     """
     return render(request, "inventory/sales_order.html", {
-
+        "orders": SalesOrder.objects.filter(user=request.user)
     })
 
 
-@login_required
+@ login_required
 def create_order(request):
     """
     Create a new sales order
     """
+
+    SalesItemFormSet = formset_factory(SalesItemForm, extra=1)
+    order = SalesOrder(user=request.user)
+
+    data = request.POST or None
+    order_form = SalesOrderForm(request.user, data, instance=order)
+
+    formset = SalesItemFormSet(data)
+
+    for form in formset:
+        form.fields['product'].queryset = Product.objects.filter(
+            user=request.user)
+
+    if request.method == "POST":
+        if all(formset.is_valid(), order_form.is_valid()):
+            order.invoice_number = '123'  # TODO auto generate
+            saved = False
+            print("FORMSET")
+            print(formset)
+            for f in formset:
+                item = f.save(commit=False)
+                item.order = order
+                if hasattr(item, 'product'):
+                    print("ITEM:")
+                    print(item)
+                    if (not saved):
+                        order_form.save()
+                        saved = True
+                    item.save()
+
+                return HttpResponseRedirect(reverse("order"))
+        # for f in formset.cleaned_data:
+        #     print("ITEM:")
+        #     print(f)
+        # for f in formset:
+        #     f.save()
+
     return render(request, "inventory/sales_order_form.html", {
-        'contact_form': CustomerContactForm(),
-        'billing_form': CustomerBillingForm(),
-        'shipping_form': CustomerShippingForm(),
-        'order_form': SalesOrderForm(request.user),
-        'item_form': SalesItemForm(request.user)
+        # 'contact_form': CustomerContactForm(),
+        # 'billing_form': CustomerBillingForm(),
+        # 'shipping_form': CustomerShippingForm(),
+        'order_form': order_form,
+        'item_formset': formset,
     })
 
 
-@login_required
+@ login_required
 def edit_order(request):
     return HttpResponse("edit order")
 
 
-@login_required
+@ login_required
 def create_sales_channel(request):
     return HttpResponse("create channel")

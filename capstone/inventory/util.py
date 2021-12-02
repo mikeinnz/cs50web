@@ -3,7 +3,7 @@ from .models import CustomerContactForm, CustomerBillingForm, CustomerShippingFo
 
 
 # Number of items per page
-ITEMS_PER_PAGE = 2
+ITEMS_PER_PAGE = 5
 
 
 def paginate_items(request, items):
@@ -20,10 +20,11 @@ def save_customer(request, customer):
     """
     Save customer to database
     """
-    contact = CustomerContactForm(request.POST or None, instance=customer)
-    billing = CustomerBillingForm(request.POST or None, instance=customer)
+    data = request.POST or None
+    contact = CustomerContactForm(data, instance=customer)
+    billing = CustomerBillingForm(data, instance=customer)
     shipping = CustomerShippingForm(
-        request.POST or None, instance=customer)
+        data, instance=customer)
     if contact.is_valid and billing.is_valid and shipping.is_valid:
         contact.save()
         billing.save()

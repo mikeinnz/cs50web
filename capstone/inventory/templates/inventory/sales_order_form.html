@@ -11,7 +11,7 @@
     <form method="post">
         {% csrf_token %}
 
-        {% include 'inventory/customer_form_template.html' %}
+        <!-- {% include 'inventory/customer_form_template.html' %} -->
 
         <div class="row gx-3 gy-2 align-items-center pt-2 pb-2 mb-3 border-top">
             {% for field in order_form %}
@@ -26,17 +26,25 @@
                 </div>
             {% endfor %}
         </div>
-        <div class="d-flex justify-content-between">
-            {% for field in item_form %}
-                <div class="flex-grow-1 me-3">
-                    <div class="form-label">
-                        {{ field.errors }}
-                        {{ field.label }}
-                    </div>
-                    {{ field }}
+
+        {{ item_formset.management_form }}
+        <div id="item-list">
+            {% for form in item_formset %}
+                <div class="item d-flex justify-content-between">
+                    {% for field in form %}
+                        <div class="flex-grow-1 me-3">
+                            <div class="form-label">
+                                {{ field.errors }}
+                                {{ field.label }}
+                            </div>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
                 </div>
             {% endfor %}
+            <div id='add_more'></div>
         </div>
+        <button type="button" class="btn btn-sm btn-primary mt-2 mb-2" id="add_product">Add product</button>
         <div class="pt-2 pb-2 mb-3">
             <a class="btn btn-primary" href="{% url 'order' %}">Cancel</a>
             <input class="btn btn-primary" type="submit" value="Save">

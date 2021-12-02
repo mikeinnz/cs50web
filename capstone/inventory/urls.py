@@ -11,6 +11,7 @@ urlpatterns = [
     path('warehouse/new', views.create_warehouse, name="create_warehouse"),
     path('warehouse/edit/<int:id>', views.edit_warehouse, name="edit_warehouse"),
     path('warehouse/view/<int:id>', views.view_warehouse, name="view_warehouse"),
+    path('warehouse/<int:id>', views.warehouse_api, name="warehouse_api"),
     path('product/list', views.product, name="product"),
     path('product/new', views.create_product, name="create_product"),
     path('product/edit/<int:id>', views.edit_product, name="edit_product"),
