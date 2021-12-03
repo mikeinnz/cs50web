@@ -15,13 +15,23 @@ function create_order() {
 
                 // let products = document.getElementById('id_form-0-product');
 
+                // obtain all dropdown lists
                 const items = document.querySelectorAll('.item .form-select');
                 
+                // set each dropdown list with new options
                 items.forEach((item) => {
+                    // clear all options
                     item.innerHTML = '';
+                    
+                    // add no select option
+                    const noselect = document.createElement('option');
+                    noselect.value = '';
+                    noselect.text = '---------';
+                    item.add(noselect);
 
+                    // add all available options
                     shelves.forEach((shelf) => {
-                        const option = document.createElement("option");
+                        const option = document.createElement('option');
                         option.value = shelf.product_id;
                         option.text = shelf.product + ` [${Math.floor(shelf.quantity)}]`;
                         item.add(option);
@@ -29,23 +39,32 @@ function create_order() {
                     
                 });
                 
-                // let quantity = document.getElementById('id_form-0-quantity');
-                // let available = document.createElement('div')
-                // available.className = 'flex-grow-1 me-3';
-                // available.innerHTML = '<div class="form-label">Available</div><input class="form-control" disabled value="1">';
-                // quantity.parentNode.parentNode.insertBefore(available, quantity.parentNode);
             })
         }
     })
 
     add_btn_el = document.getElementById('add_product');
+
+    const total_items_element = document.getElementById('id_form-TOTAL_FORMS');
+
     add_btn_el.addEventListener('click', function() {
         const parent_element = document.getElementById('item-list');
-        const copy_origin = document.querySelector('#item-list .item');
+        // identify the last item
+        const copy_origin = document.querySelector('.item:last-child');
         console.log(copy_origin);
+
+        // copy the last item
         const new_element = copy_origin.cloneNode(true);
         console.log(new_element);
+        let total_items = total_items_element.value;
+
+        // replace id with an incremental one
+        const regex = new RegExp(`-${total_items - 1}-`, 'g');
+        new_element.innerHTML = new_element.innerHTML.replace(regex, `-${total_items}-`);
         parent_element.append(new_element);
+
+        // update form-TOTAL_FORMS with a new number
+        total_items_element.value = parseInt(total_items_element.value) + 1;
     })
 }
 
