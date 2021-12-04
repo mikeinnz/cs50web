@@ -367,14 +367,20 @@ def edit_order(request, id):
 
     order_form = SalesOrderForm(request.user, instance=order)
 
-    sales_items = SalesItem.objects.filter(order=order)
-    print(list(sales_items.values()))
     SalesItemFormSet = formset_factory(SalesItemForm, extra=0)
 
-    # TODO: fix: product does not populate
-    formset = SalesItemFormSet(initial=list(sales_items.values()))
+    # by default, sales_items_list returns 'product_id' as a key (since product is a Foreign Key field defined in the model),
+    # but in order to pass as an initial data to pre-populate the selected option in the drop-down box for products, the key needs to be 'product'
+    sales_items = SalesItem.objects.filter(order=order)
+    sales_items_list = list(sales_items.values())
+    # change key from product_id to product
+    for i in sales_items_list:
+        i['product'] = i.pop('product_id')
 
-    # Populate only products available in the selected warehouse
+    # pre-populate item details
+    formset = SalesItemFormSet(initial=sales_items_list)
+
+    # Pre-populate only products available in the selected warehouse
     shelves_have_products = Shelf.objects.filter(
         user=request.user, warehouse=order.warehouse)
     product_ids = [s.product.id for s in shelves_have_products]
@@ -383,6 +389,9 @@ def edit_order(request, id):
             pk__in=product_ids).order_by('name')
 
     print(formset)
+
+    # TODO prepopulate order value, and formate quantity & price to 2 decimal places
+
     return render(request, "inventory/sales_order_form.html", {
         'edit': True,
         'order_form': order_form,
