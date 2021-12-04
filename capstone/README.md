@@ -19,7 +19,7 @@ Key features:
 - Add filter and sorting to Warehouses using list.js or django-filter
 - Report: View by product, add product view
 - Allow creating a new customer when creating a new sales order
-- TODO: create sales order: select warehouse to populate available products; allow select multiple products
+- Increment invoice number with customer name as a prefix
 
 
 ## References:

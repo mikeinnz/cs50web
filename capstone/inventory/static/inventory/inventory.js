@@ -1,13 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // copy billing details over to shipping fields
     copy_billing();
 
+    // dynamically populate products, add a new product and calculate order value when creating a sales order
     create_order();
 })
 
 function create_order() {
+    // populate available products in the selected warehouse
+    populate_products();
+
+    // add product
+    add_product();
+    
+    // calculate order value
+    calculate_order_value();
+}
+
+
+function populate_products() {
     warehouse = document.getElementById('id_warehouse');
     warehouse.addEventListener('change', function() {
         if (warehouse.value !== '') {
+            // reset order value
+            document.getElementById('value').innerHTML = 0;
+
             fetch(`/warehouse/${warehouse.value}`)
             .then(response => response.json())
             .then(shelves => {
@@ -36,15 +53,16 @@ function create_order() {
                         option.text = shelf.product + ` [${Math.floor(shelf.quantity)}]`;
                         item.add(option);
                     })
-                    
                 });
                 
             })
         }
     })
+}
 
+
+function add_product() {
     add_btn_el = document.getElementById('add_product');
-
     const total_items_element = document.getElementById('id_form-TOTAL_FORMS');
 
     add_btn_el.addEventListener('click', function() {
@@ -65,10 +83,44 @@ function create_order() {
 
         // update form-TOTAL_FORMS with a new number
         total_items_element.value = parseInt(total_items_element.value) + 1;
+
+        // add event listener to this new item as well
+        calculate_order_value() 
     })
 }
 
+function calculate_order_value() {
+    // listen to each change in item details
+    document.querySelectorAll('.value').forEach(item => {
+        item.addEventListener('change', update_order_value);
+    })
+}
 
+function update_order_value(event) {
+        console.log(event.target.id);
+        const total_items = document.getElementById('id_form-TOTAL_FORMS').value;
+
+        // initiate order value
+        var value = 0;
+
+        for (let i = 0; i < total_items; i++) {
+            product = document.getElementById(`id_form-${i}-product`);
+
+            // only proceed if a valid product is selected
+            if (product.value !== '') {
+                console.log(product.value);
+                const quantity = document.getElementById(`id_form-${i}-quantity`).value;
+                const price = document.getElementById(`id_form-${i}-price`).value;
+                const discount = document.getElementById(`id_form-${i}-discount`).value;
+                const sub_total = quantity * (1 - discount) * price;
+                console.log(sub_total);
+                value += sub_total;
+            }
+        }
+
+        // update order value
+        document.getElementById('value').innerHTML = value.toFixed(2);
+}
 
 function copy_billing() {
     copy_billing_btn = document.getElementById('copy_billing')

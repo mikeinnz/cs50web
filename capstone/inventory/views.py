@@ -312,56 +312,59 @@ def order(request):
     View Sales Orders
     """
     return render(request, "inventory/sales_order.html", {
-        "orders": SalesOrder.objects.filter(user=request.user)
+        "orders": SalesOrder.objects.filter(user=request.user).order_by('-id')
     })
 
 
 @ login_required
 def create_order(request):
     """
-    Create a new sales order
+    Create a new sales order and update inventory
     """
 
-    SalesItemFormSet = formset_factory(SalesItemForm, extra=1)
-    order = SalesOrder(user=request.user)
-
     data = request.POST or None
+    order = SalesOrder(user=request.user)
     order_form = SalesOrderForm(request.user, data, instance=order)
 
+    SalesItemFormSet = formset_factory(SalesItemForm)
     formset = SalesItemFormSet(data)
 
+    # Filter products belonging to the current user
     for form in formset:
         form.fields['product'].queryset = Product.objects.filter(
             user=request.user)
 
     if request.method == "POST":
-        if all(formset.is_valid(), order_form.is_valid()):
+        if formset.is_valid() and order_form.is_valid():
             order.invoice_number = '123'  # TODO auto generate
             saved = False
-            print("FORMSET")
-            print(formset)
+
             for f in formset:
                 item = f.save(commit=False)
                 item.order = order
+
+                # Save only items where product was selected
                 if hasattr(item, 'product'):
                     print("ITEM:")
                     print(item)
-                    if (not saved):
-                        order_form.save()
-                        saved = True
-                    item.save()
+                    shelf = Shelf.objects.get(
+                        user=request.user, warehouse=order.warehouse, product=item.product)
 
+                    # has enough inventory
+                    if shelf.quantity >= item.quantity:
+                        if (not saved):
+                            # Save order before its items
+                            order_form.save()
+                            saved = True
+                        item.save()
+                        # Update inventory
+                        shelf.quantity = shelf.quantity - item.quantity
+                        shelf.save()
+
+            if saved:
                 return HttpResponseRedirect(reverse("order"))
-        # for f in formset.cleaned_data:
-        #     print("ITEM:")
-        #     print(f)
-        # for f in formset:
-        #     f.save()
 
     return render(request, "inventory/sales_order_form.html", {
-        # 'contact_form': CustomerContactForm(),
-        # 'billing_form': CustomerBillingForm(),
-        # 'shipping_form': CustomerShippingForm(),
         'order_form': order_form,
         'item_formset': formset,
     })

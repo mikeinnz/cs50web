@@ -181,7 +181,7 @@ class SalesOrder(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
     tracking = models.CharField(max_length=256, blank=True)
     status = models.CharField(
-        max_length=32, choices=STATUS_CHOICES, default="DRAFT")
+        max_length=32, choices=STATUS_CHOICES, default="CREATED")
     reference = models.CharField(max_length=32, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -234,10 +234,10 @@ class SalesItemForm(ModelForm):
         model = SalesItem
         exclude = ['order']
         widgets = {
-            'product': forms.Select(attrs={'class': 'form-select'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
-            'discount': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e-2'})
+            'product': forms.Select(attrs={'class': 'form-select value'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1'}),
+            'discount': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1e-2'})
         }
         labels = {
             'product': 'Product [Available]',

@@ -37,7 +37,7 @@
                             <td><a class="edit-link" href="{% url 'edit_order' order.id %}">{{ order.id }}</a></td>
                             <td>{{ order.created_date }}</td>
                             <td>{{ order.invoice_date }}</td>
-                            <td>{{ order.customer }}</td>
+                            <td>{{ order.customer.first_name }} {{ order.customer.last_name }}</td>
                             <td>{{ order.status }}</td>
                             <td>{{ order.channel }}</td>
                             <td>{{ order.warehouse }}</td>
