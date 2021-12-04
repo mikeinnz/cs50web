@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // dynamically populate products, add a new product and calculate order value when creating a sales order
     create_order();
+
+    // prepopulate order value
+    update_order_value();
+
+    // format quantity, price and discount
+    format_numbers();
 })
 
 function create_order() {
@@ -28,9 +34,6 @@ function populate_products() {
             fetch(`/warehouse/${warehouse.value}`)
             .then(response => response.json())
             .then(shelves => {
-                // shelves.forEach(load_product)
-
-                // let products = document.getElementById('id_form-0-product');
 
                 // obtain all dropdown lists
                 const items = document.querySelectorAll('.item .form-select');
@@ -92,12 +95,12 @@ function add_product() {
 function calculate_order_value() {
     // listen to each change in item details
     document.querySelectorAll('.value').forEach(item => {
+        // user a named function instead of arrow function in order to save memory
         item.addEventListener('change', update_order_value);
     })
 }
 
-function update_order_value(event) {
-        console.log(event.target.id);
+function update_order_value() {
         const total_items = document.getElementById('id_form-TOTAL_FORMS').value;
 
         // initiate order value
@@ -108,18 +111,31 @@ function update_order_value(event) {
 
             // only proceed if a valid product is selected
             if (product.value !== '') {
-                console.log(product.value);
                 const quantity = document.getElementById(`id_form-${i}-quantity`).value;
                 const price = document.getElementById(`id_form-${i}-price`).value;
                 const discount = document.getElementById(`id_form-${i}-discount`).value;
                 const sub_total = quantity * (1 - discount) * price;
-                console.log(sub_total);
                 value += sub_total;
             }
         }
 
         // update order value
         document.getElementById('value').innerHTML = value.toFixed(2);
+}
+
+
+function format_numbers(){
+    // select all input fields for quantity, price, and discount
+    document.querySelectorAll(('input.value')).forEach(e => {
+        if (parseFloat(e.value) % 1 != 0) {
+            // show only two decimal points
+            e.value = parseFloat(e.value).toFixed(2);
+        }
+        else {
+            // show whole number
+            e.value = parseFloat(e.value).toFixed(0);
+        }
+    })
 }
 
 function copy_billing() {

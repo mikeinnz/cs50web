@@ -1,8 +1,6 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models.query import QuerySet
-from django.forms import formset_factory, modelform_factory
-from django.forms.models import modelform_factory, modelformset_factory
+from django.forms import formset_factory
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -390,7 +388,7 @@ def edit_order(request, id):
 
     print(formset)
 
-    # TODO prepopulate order value, and formate quantity & price to 2 decimal places
+    # Prepopulate order value, and formate quantity & price to 2 decimal places
 
     return render(request, "inventory/sales_order_form.html", {
         'edit': True,
