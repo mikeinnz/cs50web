@@ -149,15 +149,15 @@ class ProductForm(ModelForm):
             'category': forms.Select(attrs={'class': 'form-select'}),
             'batch': forms.TextInput(attrs={'class': 'form-control'}),
             'expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'unit_cost': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e-2'}),
-            'retail_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e-2'}),
+            'unit_cost': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e1', 'min': '0'}),
+            'retail_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '1e1', 'min': '0'}),
         }
 
     # dynamically filter Category belonging to the current user
     def __init__(self, user, *args, **kwargs):
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['category'].queryset = ProductCategory.objects.filter(
-            user=user)
+            user=user).order_by('category')
 
 
 class SalesOrder(models.Model):
@@ -179,10 +179,10 @@ class SalesOrder(models.Model):
     channel = models.ForeignKey(
         SalesChannel, blank=True, null=True, on_delete=models.PROTECT)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
-    tracking = models.CharField(max_length=256, blank=True)
+    reference = models.CharField(max_length=32, blank=True)
     status = models.CharField(
         max_length=32, choices=STATUS_CHOICES, default="CREATED")
-    reference = models.CharField(max_length=32, blank=True)
+    tracking = models.CharField(max_length=256, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -206,10 +206,12 @@ class SalesOrderForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super(SalesOrderForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Customer.objects.filter(user=user)
+        self.fields['customer'].queryset = Customer.objects.filter(
+            user=user).order_by('first_name')
         self.fields['channel'].queryset = SalesChannel.objects.filter(
-            user=user)
-        self.fields['warehouse'].queryset = Warehouse.objects.filter(user=user)
+            user=user).order_by('channel')
+        self.fields['warehouse'].queryset = Warehouse.objects.filter(
+            user=user).order_by('warehouse')
 
 
 class SalesItem(models.Model):
@@ -233,11 +235,12 @@ class SalesItemForm(ModelForm):
     class Meta:
         model = SalesItem
         exclude = ['order']
+        # set up each field with the same class 'value' in order to calculate order value in javascript
         widgets = {
             'product': forms.Select(attrs={'class': 'form-select value'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1'}),
-            'discount': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1e-2'})
+            'quantity': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1e-1', 'min': '0'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1e-2', 'min': '0'}),
+            'discount': forms.NumberInput(attrs={'class': 'form-control value', 'step': '1e-1', 'min': '0'})
         }
         labels = {
             'product': 'Product [Available]',

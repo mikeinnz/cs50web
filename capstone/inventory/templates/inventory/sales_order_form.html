@@ -6,7 +6,11 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Create A New Sales Order</h2>
+    {% if edit %}
+        <h2>Edit Order</h2>
+    {% else %}
+        <h2>Create A New Sales Order</h2>
+    {% endif %}
 
     <form method="post">
         {% csrf_token %}

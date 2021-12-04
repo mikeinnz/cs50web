@@ -59,13 +59,10 @@ def edit_customer(request, id):
     Edit a customer
     """
     try:
-        customer = Customer.objects.get(pk=id)
+        customer = Customer.objects.get(pk=id, user=request.user)
     except Customer.DoesNotExist:
         return JsonResponse({"error": "Customer not found."}, status=404)
-
-    if customer not in request.user.customers.all():
-        # TODO: show message instead of JsonResponse
-        return JsonResponse({"error": "Access denined."}, status=404)
+        # TODO: show message instead of JsonResponse - try get_object_or_404
 
     if request.method == "POST":
         save_customer(request, customer)
@@ -130,13 +127,9 @@ def edit_warehouse(request, id):
         return JsonResponse(status=404)
 
     try:
-        warehouse = Warehouse.objects.get(pk=id)
+        warehouse = Warehouse.objects.get(pk=id, user=request.user)
     except Warehouse.DoesNotExist:
         return JsonResponse({"error": "Warehouse not found."}, status=404)
-
-    if warehouse not in request.user.warehouses.all():
-        # TODO: show message instead of JsonResponse
-        return JsonResponse({"error": "Access denined."}, status=404)
 
     if request.method == "POST":
         warehouse_form = WarehouseForm(
@@ -158,13 +151,10 @@ def view_warehouse(request, id):
     View a specified warehouse's inventory
     """
     try:
-        warehouse = Warehouse.objects.get(pk=id)
+        warehouse = Warehouse.objects.get(pk=id, user=request.user)
     except Warehouse.DoesNotExist:
         return JsonResponse({"error": "Warehouse not found."}, status=404)
-
-    if warehouse not in request.user.warehouses.all():
         # TODO: show message instead of JsonResponse
-        return JsonResponse({"error": "Access denined."}, status=404)
 
     shelves = Shelf.objects.filter(user=request.user, warehouse=warehouse)
     return render(request, "inventory/warehouse.html", {
@@ -177,13 +167,10 @@ def view_warehouse(request, id):
 @login_required
 def warehouse_api(request, id):
     try:
-        warehouse = Warehouse.objects.get(pk=id)
+        warehouse = Warehouse.objects.get(pk=id, user=request.user)
     except Warehouse.DoesNotExist:
         return JsonResponse({"error": "Warehouse not found."}, status=404)
-
-    if warehouse not in request.user.warehouses.all():
         # TODO: show message instead of JsonResponse
-        return JsonResponse({"error": "Access denined."}, status=404)
 
     shelves = Shelf.objects.filter(
         user=request.user, warehouse=warehouse)
@@ -191,7 +178,7 @@ def warehouse_api(request, id):
     return JsonResponse([shelf.serialize() for shelf in shelves], safe=False)
 
 
-@ login_required
+@login_required
 def product(request):
     """
     View a list of products
@@ -205,7 +192,7 @@ def product(request):
     })
 
 
-@ login_required
+@login_required
 def create_product(request):
     """
     Create a new product
@@ -227,19 +214,16 @@ def create_product(request):
         })
 
 
-@ login_required
+@login_required
 def edit_product(request, id):
     """
     Edit a product
     """
     try:
-        product = Product.objects.get(pk=id)
+        product = Product.objects.get(pk=id, user=request.user)
     except Product.DoesNotExist:
         return JsonResponse({"error": "Product not found."}, status=404)
-
-    if product not in request.user.products.all():
         # TODO: show message instead of JsonResponse
-        return JsonResponse({"error": "Access denined."}, status=404)
 
     if request.method == "POST":
         product_form = ProductForm(request.user,
@@ -255,7 +239,7 @@ def edit_product(request, id):
         })
 
 
-@ login_required
+@login_required
 def create_category(request):
     """
     Create a new category
@@ -278,13 +262,13 @@ def create_category(request):
         })
 
 
-@ login_required
+@login_required
 def edit_category(request, id):
     """
     Edit a category (name only)
     """
     try:
-        category = ProductCategory.objects.get(pk=id)
+        category = ProductCategory.objects.get(pk=id, user=request.user)
     except ProductCategory.DoesNotExist:
         return JsonResponse({"error": "Category not found."}, status=404)
 
@@ -306,7 +290,7 @@ def edit_category(request, id):
         })
 
 
-@ login_required
+@login_required
 def order(request):
     """
     View Sales Orders
@@ -316,7 +300,7 @@ def order(request):
     })
 
 
-@ login_required
+@login_required
 def create_order(request):
     """
     Create a new sales order and update inventory
@@ -332,7 +316,7 @@ def create_order(request):
     # Filter products belonging to the current user
     for form in formset:
         form.fields['product'].queryset = Product.objects.filter(
-            user=request.user)
+            user=request.user).order_by('name')
 
     if request.method == "POST":
         if formset.is_valid() and order_form.is_valid():
@@ -350,8 +334,8 @@ def create_order(request):
                     shelf = Shelf.objects.get(
                         user=request.user, warehouse=order.warehouse, product=item.product)
 
-                    # has enough inventory
-                    if shelf.quantity >= item.quantity:
+                    # has enough inventory and quantity, price & discount must not be negative
+                    if shelf.quantity >= item.quantity and item.quantity > 0 and item.price >= 0 and item.discount >= 0:
                         if (not saved):
                             # Save order before its items
                             order_form.save()
@@ -370,11 +354,42 @@ def create_order(request):
     })
 
 
-@ login_required
-def edit_order(request):
-    return HttpResponse("edit order")
+@login_required
+def edit_order(request, id):
+    """
+    Edit a sales order
+    """
+
+    try:
+        order = SalesOrder.objects.get(pk=id, user=request.user)
+    except SalesOrder.DoesNotExist:
+        return JsonResponse({"error": "Sales Order not found."}, status=404)
+
+    order_form = SalesOrderForm(request.user, instance=order)
+
+    sales_items = SalesItem.objects.filter(order=order)
+    print(list(sales_items.values()))
+    SalesItemFormSet = formset_factory(SalesItemForm, extra=0)
+
+    # TODO: fix: product does not populate
+    formset = SalesItemFormSet(initial=list(sales_items.values()))
+
+    # Populate only products available in the selected warehouse
+    shelves_have_products = Shelf.objects.filter(
+        user=request.user, warehouse=order.warehouse)
+    product_ids = [s.product.id for s in shelves_have_products]
+    for form in formset:
+        form.fields['product'].queryset = Product.objects.filter(
+            pk__in=product_ids).order_by('name')
+
+    print(formset)
+    return render(request, "inventory/sales_order_form.html", {
+        'edit': True,
+        'order_form': order_form,
+        'item_formset': formset,
+    })
 
 
-@ login_required
+@login_required
 def create_sales_channel(request):
     return HttpResponse("create channel")

@@ -20,6 +20,9 @@ Key features:
 - Report: View by product, add product view
 - Allow creating a new customer when creating a new sales order
 - Increment invoice number with customer name as a prefix
+- Allow managing products by batch
+- Toggle left menu
+- TODO: paginate sales order
 
 
 ## References:
