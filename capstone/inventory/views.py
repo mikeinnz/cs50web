@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
@@ -112,7 +113,8 @@ def create_warehouse(request):
 
     else:
         return render(request, "inventory/warehouse_form.html", {
-            "form": WarehouseForm()
+            "form": WarehouseForm(),
+            "warehouses": Warehouse.objects.filter(user=request.user)
         })
 
 
@@ -139,7 +141,8 @@ def edit_warehouse(request, id):
     else:
         return render(request, "inventory/warehouse_form.html", {
             "edit": True,
-            "form": WarehouseForm(instance=warehouse)
+            "form": WarehouseForm(instance=warehouse),
+            "warehouses": Warehouse.objects.filter(user=request.user)
         })
 
 
@@ -290,15 +293,39 @@ def order(request):
     """
     View Sales Orders
     """
-    sales_orders = SalesOrder.objects.filter(user=request.user).order_by('-id')
+
+    # if request.method == "GET":
+    #     date_type = request.GET.get('date_type')
+    #     from_date = request.GET.get('from_date')
+    #     to_date = request.GET.get('to_date')
+    #     print(date_type)
+    #     print(from_date)
+    #     print(to_date)
+
+    # if from_date is not None and to_date is not None and datetime.strptime(from_date, '%m-%d-%y') and datetime.strptime(to_date, '%m-%d-%y'):
+    #     if date_type == "created_date":
+    #         print("HOLA")
+
+    # Show orders excluding closed ones
+    sales_orders = SalesOrder.objects.filter(
+        user=request.user).exclude(status='CLOSED').order_by('-id')
+
+    # Add order values to order list
     for order in sales_orders:
         order.value = 0
         for item in SalesItem.objects.filter(order=order):
             order.value = order.value + item.sub_total()
 
     return render(request, "inventory/sales_order.html", {
+        "form": SearchOrderForm(),
         "page_obj": paginate_items(request, sales_orders)
     })
+
+
+@login_required
+def order_api(request):
+    all_orders = SalesOrder.objects.filter(user=request.user).order_by('-id')
+    return JsonResponse([order.serialize() for order in all_orders], safe=False)
 
 
 @login_required
@@ -392,6 +419,7 @@ def edit_order(request, id):
                 if form.has_changed():
                     # Remove existing items from database and update database
                     if not reset:
+                        existing_items = SalesItem.objects.filter(order=order)
                         shelf = Shelf.objects.get(
                             user=request.user, warehouse=order.warehouse, product=item.product)
                         reset = True

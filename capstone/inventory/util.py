@@ -3,7 +3,7 @@ from .models import CustomerContactForm, CustomerBillingForm, CustomerShippingFo
 
 
 # Number of items per page
-ITEMS_PER_PAGE = 5
+ITEMS_PER_PAGE = 10
 
 
 def paginate_items(request, items):

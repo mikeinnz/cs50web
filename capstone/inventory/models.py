@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.base import Model
-from django.db.models.deletion import CASCADE, DO_NOTHING
+from django.db.models.deletion import CASCADE
 from django.forms import ModelForm, widgets
 
 from datetime import date
@@ -175,7 +175,8 @@ class SalesOrder(models.Model):
         ('CREATED', 'Created'),
         ('INVOICED', 'Invoiced'),
         ('DISPATCHED', 'Dispatched'),
-        ('PAID', 'Paid')
+        ('PAID', 'Paid'),
+        ('CLOSED', 'Closed')
     ]
 
     user = models.ForeignKey(
@@ -196,6 +197,19 @@ class SalesOrder(models.Model):
 
     def __str__(self):
         return f"Order No. { self.id } with ref #{ self.reference }"
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'created_date': self.created_date,
+            'invoice_date': self.invoice_date,
+            'first_name': self.customer.first_name,
+            'last_name': self.customer.last_name,
+            'status': self.status,
+            'channel': self.channel.channel,  # TODO: when channel is None type, fix erros
+            'warehouse': self.warehouse.warehouse,
+            'value': sum(i.sub_total() for i in self.items.all())
+        }
 
 
 class SalesOrderForm(ModelForm):
@@ -221,6 +235,20 @@ class SalesOrderForm(ModelForm):
             user=user).order_by('channel')
         self.fields['warehouse'].queryset = Warehouse.objects.filter(
             user=user).order_by('warehouse')
+
+
+class SearchOrderForm(forms.Form):
+    CHOICES = (
+        ('', ''),
+        ('CREATED_DATE', 'Created date'),
+        ('INVOICE_DATE', 'Invoice date'),
+    )
+    date_type = forms.ChoiceField(label='Search by', choices=CHOICES, widget=forms.Select(
+        attrs={'class': 'form-select'}), required=False)
+    from_date = forms.DateField(
+        label='From', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=False)
+    to_date = forms.DateField(
+        label='To', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=False)
 
 
 class SalesItem(models.Model):

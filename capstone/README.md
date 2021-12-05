@@ -22,6 +22,7 @@ Key features:
 - Increment invoice number with customer name as a prefix
 - Allow managing products by batch
 - Toggle left menu
+- TODO: add time range to order list
 
 
 ## References:

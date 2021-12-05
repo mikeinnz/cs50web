@@ -22,4 +22,15 @@
         </div>
     </form>
 
+    <div class="col-12 col-lg-6 col-md-9 col-sm-10">
+        {% if warehouses %}
+            <h4>Available Warehouses</h4>
+            <ul class="list-group">
+                {% for warehouse in warehouses %}
+                    <li class="list-group-item"><a class="edit-link" href="{% url 'view_warehouse' warehouse.id %}">{{ warehouse }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
 {% endblock %}

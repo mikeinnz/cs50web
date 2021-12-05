@@ -1,6 +1,5 @@
 {% extends 'inventory/layout.html' %}
 {% load static %}
-{% load humanize %}
 
 {% block title %}
     Create A New Sales Order
@@ -54,7 +53,7 @@
         </div>
         <button type="button" class="btn btn-sm btn-primary mt-2 mb-2" id="add_product">Add product</button>
         <div class="pt-2 pb-2 mb-3">
-            <a class="btn btn-primary" href="{% url 'order' %}">Cancel</a>
+            <a class="btn btn-primary" href="{% url 'order' %}">Back</a>
             <input class="btn btn-primary" type="submit" value="Save">
         </div>
     </form>
