@@ -291,6 +291,11 @@ def order(request):
     View Sales Orders
     """
     sales_orders = SalesOrder.objects.filter(user=request.user).order_by('-id')
+    for order in sales_orders:
+        order.value = 0
+        for item in SalesItem.objects.filter(order=order):
+            order.value = order.value + item.sub_total()
+
     return render(request, "inventory/sales_order.html", {
         "page_obj": paginate_items(request, sales_orders)
     })

@@ -41,13 +41,13 @@
                             <td>{{ order.status }}</td>
                             <td>{{ order.channel }}</td>
                             <td>{{ order.warehouse }}</td>
-                            <td>{{ order.total }}</td>
+                            <td>${{ order.value|floatformat:2 }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        
+
         {% include 'inventory/pagination.html' %}
     {% endif %}
 {% endblock %}
