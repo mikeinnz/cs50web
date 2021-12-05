@@ -1,0 +1,38 @@
+{% extends 'inventory/layout.html' %}
+
+{% block title %}
+    Create A New Sales Channel
+{% endblock %}
+
+{% block body %}
+    {% if edit %}
+        <h2>Edit Sales Channel</h2>
+    {% else %}
+        <h2>Create A New Sales Channel</h2>
+    {% endif %}
+
+    <form method="post" class="border-top pt-2">
+        {% csrf_token %}
+        <div class="col-12 col-lg-6 col-md-9 col-sm-10">
+            {{ form }}
+        </div>
+        <div class="pt-2 pb-2 mb-3 border-bottom">
+            <a class="btn btn-primary btn-sm" href="{% url 'order' %}">{% if edit %}Cancel{% else %}Back{% endif %}</a>
+            <input class="btn btn-primary btn-sm" type="submit" value="Save">
+        </div>
+    </form>
+
+    {% if not edit %}
+        <div class="col-12 col-lg-6 col-md-9 col-sm-10">
+            {% if channels %}
+                <h4>Available Sales Channels</h4>
+                <ul class="list-group">
+                    {% for channel in channels %}
+                        <li class="list-group-item"><a class="edit-link" href="{% url 'edit_sales_channel' channel.id %}">{{ channel }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+
+{% endblock %}
