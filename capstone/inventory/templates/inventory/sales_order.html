@@ -13,7 +13,7 @@
     </div>
 
 
-    {% if not orders%}
+    {% if not page_obj.object_list %}
         <span class="pagination">No Orders.</span>
     {% else %}
         <div class="table-responsive-md">
@@ -32,7 +32,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for order in orders %}
+                    {% for order in page_obj %}
                         <tr class="table-striped">
                             <td><a class="edit-link" href="{% url 'edit_order' order.id %}">{{ order.id }}</a></td>
                             <td>{{ order.created_date }}</td>
@@ -47,5 +47,7 @@
                 </tbody>
             </table>
         </div>
+        
+        {% include 'inventory/pagination.html' %}
     {% endif %}
 {% endblock %}

@@ -21,4 +21,6 @@ urlpatterns = [
     path('order/new', views.create_order, name="create_order"),
     path('order/edit/<int:id>', views.edit_order, name="edit_order"),
     path('channel/new', views.create_sales_channel, name="create_sales_channel"),
+    path('channel/edit/<int:id>', views.edit_sales_channel,
+         name="edit_sales_channel"),
 ]

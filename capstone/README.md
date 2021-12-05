@@ -22,7 +22,6 @@ Key features:
 - Increment invoice number with customer name as a prefix
 - Allow managing products by batch
 - Toggle left menu
-- TODO: paginate sales order
 
 
 ## References:

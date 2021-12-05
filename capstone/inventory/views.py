@@ -87,7 +87,7 @@ def warehouse(request):
         user=request.user).order_by('warehouse')
 
     shelves = Shelf.objects.filter(
-        user=request.user).order_by('warehouse')
+        user=request.user).order_by('warehouse', '-product')
     return render(request, "inventory/warehouse.html", {
         'warehouses': warehouses,
         'shelves': shelves
@@ -154,7 +154,8 @@ def view_warehouse(request, id):
         return JsonResponse({"error": "Warehouse not found."}, status=404)
         # TODO: show message instead of JsonResponse
 
-    shelves = Shelf.objects.filter(user=request.user, warehouse=warehouse)
+    shelves = Shelf.objects.filter(
+        user=request.user, warehouse=warehouse).order_by('-product')
     return render(request, "inventory/warehouse.html", {
         'warehouses': warehouse,
         'shelves': shelves,
@@ -270,10 +271,6 @@ def edit_category(request, id):
     except ProductCategory.DoesNotExist:
         return JsonResponse({"error": "Category not found."}, status=404)
 
-    if category not in request.user.categories.all():
-        # TODO: show message instead of JsonResponse
-        return JsonResponse({"error": "Access denined."}, status=404)
-
     if request.method == "POST":
         category_form = ProductCategoryForm(
             request.POST or None, instance=category)
@@ -293,8 +290,9 @@ def order(request):
     """
     View Sales Orders
     """
+    sales_orders = SalesOrder.objects.filter(user=request.user).order_by('-id')
     return render(request, "inventory/sales_order.html", {
-        "orders": SalesOrder.objects.filter(user=request.user).order_by('-id')
+        "page_obj": paginate_items(request, sales_orders)
     })
 
 
@@ -363,9 +361,10 @@ def edit_order(request, id):
     except SalesOrder.DoesNotExist:
         return JsonResponse({"error": "Sales Order not found."}, status=404)
 
-    order_form = SalesOrderForm(request.user, instance=order)
+    data = request.POST or None
+    order_form = SalesOrderForm(request.user, data, instance=order)
 
-    SalesItemFormSet = formset_factory(SalesItemForm, extra=0)
+    SalesItemFormSet = formset_factory(SalesItemForm, extra=1)
 
     # by default, sales_items_list returns 'product_id' as a key (since product is a Foreign Key field defined in the model),
     # but in order to pass as an initial data to pre-populate the selected option in the drop-down box for products, the key needs to be 'product'
@@ -376,7 +375,29 @@ def edit_order(request, id):
         i['product'] = i.pop('product_id')
 
     # pre-populate item details
-    formset = SalesItemFormSet(initial=sales_items_list)
+    formset = SalesItemFormSet(data, initial=sales_items_list)
+
+    if request.method == 'POST':
+        if formset.is_valid() and order_form.is_valid():
+            if order_form.has_changed():
+                order_form.save()
+
+            reset = False
+            for form in formset:
+                if form.has_changed():
+                    # Remove existing items from database and update database
+                    if not reset:
+                        shelf = Shelf.objects.get(
+                            user=request.user, warehouse=order.warehouse, product=item.product)
+                        reset = True
+                    item = form.save(commit=False)
+                    item.order = order
+                    print(form.changed_data)
+                    # Save only items where product was selected
+                    if hasattr(item, 'product'):
+                        print('HAAssss')
+                        item.save()
+            return HttpResponseRedirect(reverse('order'))
 
     # Pre-populate only products available in the selected warehouse
     shelves_have_products = Shelf.objects.filter(
@@ -386,7 +407,7 @@ def edit_order(request, id):
         form.fields['product'].queryset = Product.objects.filter(
             pk__in=product_ids).order_by('name')
 
-    print(formset)
+    # print(formset)
 
     # Prepopulate order value, and formate quantity & price to 2 decimal places
 
@@ -399,4 +420,46 @@ def edit_order(request, id):
 
 @login_required
 def create_sales_channel(request):
-    return HttpResponse("create channel")
+    """
+    Create a new sales channel
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse(status=404)
+
+    if request.method == "POST":
+        channel = SalesChannel(user=request.user)
+        channel_form = SalesChannelForm(
+            request.POST or None, instance=channel)
+        if channel_form.is_valid:
+            channel_form.save()
+        return HttpResponseRedirect(reverse("order"))
+
+    else:
+        return render(request, "inventory/channel_form.html", {
+            "form": SalesChannelForm(),
+            'channels': SalesChannel.objects.filter(user=request.user)
+        })
+
+
+@login_required
+def edit_sales_channel(request, id):
+    """
+    Edit a sales channel (name only)
+    """
+    try:
+        channel = SalesChannel.objects.get(pk=id, user=request.user)
+    except SalesChannel.DoesNotExist:
+        return JsonResponse({"error": "Channel not found."}, status=404)
+
+    if request.method == "POST":
+        channel_form = SalesChannelForm(
+            request.POST or None, instance=channel)
+        if channel_form.is_valid:
+            channel_form.save()
+        return HttpResponseRedirect(reverse("create_sales_channel"))
+
+    else:
+        return render(request, "inventory/channel_form.html", {
+            "edit": True,
+            "form": SalesChannelForm(instance=channel)
+        })

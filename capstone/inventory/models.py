@@ -120,6 +120,15 @@ class SalesChannel(models.Model):
         return f"{ self.channel }"
 
 
+class SalesChannelForm(ModelForm):
+    class Meta:
+        model = SalesChannel
+        fields = ['channel']
+        widgets = {
+            'channel': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
+        }
+
+
 class Product(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="products")

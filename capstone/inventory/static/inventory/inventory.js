@@ -88,7 +88,10 @@ function add_product() {
         total_items_element.value = parseInt(total_items_element.value) + 1;
 
         // add event listener to this new item as well
-        calculate_order_value() 
+        calculate_order_value();
+
+        // format the new added numbers too
+        format_numbers();
     })
 }
 
@@ -119,8 +122,8 @@ function update_order_value() {
             }
         }
 
-        // update order value
-        document.getElementById('value').innerHTML = value.toFixed(2);
+        // update order value, show up to two decimal places
+        document.getElementById('value').innerHTML = new Intl.NumberFormat().format(value.toFixed(2));
 }
 
 
