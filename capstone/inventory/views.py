@@ -294,21 +294,34 @@ def order(request):
     View Sales Orders
     """
 
-    # if request.method == "GET":
-    #     date_type = request.GET.get('date_type')
-    #     from_date = request.GET.get('from_date')
-    #     to_date = request.GET.get('to_date')
-    #     print(date_type)
-    #     print(from_date)
-    #     print(to_date)
+    date_form = SearchDateForm(request.POST or None)
+    status_form = SearchStatusForm(request.GET or None)
 
-    # if from_date is not None and to_date is not None and datetime.strptime(from_date, '%m-%d-%y') and datetime.strptime(to_date, '%m-%d-%y'):
-    #     if date_type == "created_date":
-    #         print("HOLA")
-
-    # Show orders excluding closed ones
+    # Set default orders excluding closed ones
     sales_orders = SalesOrder.objects.filter(
-        user=request.user).exclude(status='CLOSED').order_by('-id')
+        user=request.user).exclude(status=SalesOrder.CLOSED).order_by('-id')
+
+    if request.method == "GET":
+        query = request.GET.get('search')
+        if query == "show_all":
+            sales_orders = SalesOrder.objects.filter(
+                user=request.user).order_by('-id')
+
+        elif status_form.is_valid():
+            status = status_form.cleaned_data['status']
+            sales_orders = SalesOrder.objects.filter(
+                user=request.user, status=status).order_by('-id')
+
+    if request.method == "POST":
+        if date_form.is_valid():
+            data = date_form.cleaned_data
+            if data['from_date'] is not None and data['to_date'] is not None:
+                if data['date_type'] == SearchDateForm.CREATED_DATE:
+                    sales_orders = SalesOrder.objects.filter(
+                        user=request.user, created_date__gte=data['from_date'], created_date__lte=data['to_date']).order_by('-created_date')
+                elif data['date_type'] == SearchDateForm.INVOICE_DATE:
+                    sales_orders = SalesOrder.objects.filter(
+                        user=request.user, invoice_date__gte=data['from_date'], invoice_date__lte=data['to_date']).order_by('-invoice_date')
 
     # Add order values to order list
     for order in sales_orders:
@@ -317,18 +330,19 @@ def order(request):
             order.value = order.value + item.sub_total()
 
     return render(request, "inventory/sales_order.html", {
-        "form": SearchOrderForm(),
+        "date_form": date_form,
+        "status_form": status_form,
         "page_obj": paginate_items(request, sales_orders)
     })
 
 
-@login_required
+@ login_required
 def order_api(request):
     all_orders = SalesOrder.objects.filter(user=request.user).order_by('-id')
     return JsonResponse([order.serialize() for order in all_orders], safe=False)
 
 
-@login_required
+@ login_required
 def create_order(request):
     """
     Create a new sales order and update inventory
@@ -382,7 +396,7 @@ def create_order(request):
     })
 
 
-@login_required
+@ login_required
 def edit_order(request, id):
     """
     Edit a sales order
@@ -451,7 +465,7 @@ def edit_order(request, id):
     })
 
 
-@login_required
+@ login_required
 def create_sales_channel(request):
     """
     Create a new sales channel
@@ -474,7 +488,7 @@ def create_sales_channel(request):
         })
 
 
-@login_required
+@ login_required
 def edit_sales_channel(request, id):
     """
     Edit a sales channel (name only)

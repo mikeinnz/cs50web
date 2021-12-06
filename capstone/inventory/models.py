@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.base import Model
 from django.db.models.deletion import CASCADE
@@ -170,13 +171,20 @@ class ProductForm(ModelForm):
 
 
 class SalesOrder(models.Model):
+    DRAFT = 'DRAFT'
+    CREATED = 'CREATED'
+    INVOICED = 'INVOICED'
+    DISPATCHED = 'DISPATCHED'
+    PAID = 'PAID'
+    CLOSED = 'CLOSED'
+
     STATUS_CHOICES = [
-        ('DRAFT', 'Draft'),
-        ('CREATED', 'Created'),
-        ('INVOICED', 'Invoiced'),
-        ('DISPATCHED', 'Dispatched'),
-        ('PAID', 'Paid'),
-        ('CLOSED', 'Closed')
+        (DRAFT, 'Draft'),
+        (CREATED, 'Created'),
+        (INVOICED, 'Invoiced'),
+        (DISPATCHED, 'Dispatched'),
+        (PAID, 'Paid'),
+        (CLOSED, 'Closed')
     ]
 
     user = models.ForeignKey(
@@ -191,7 +199,7 @@ class SalesOrder(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT)
     reference = models.CharField(max_length=32, blank=True)
     status = models.CharField(
-        max_length=32, choices=STATUS_CHOICES, default="CREATED")
+        max_length=32, choices=STATUS_CHOICES, default=CREATED)
     tracking = models.CharField(max_length=256, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -237,18 +245,31 @@ class SalesOrderForm(ModelForm):
             user=user).order_by('warehouse')
 
 
-class SearchOrderForm(forms.Form):
-    CHOICES = (
-        ('', ''),
-        ('CREATED_DATE', 'Created date'),
-        ('INVOICE_DATE', 'Invoice date'),
-    )
+class SearchDateForm(forms.Form):
+    CREATED_DATE = 'CREATED_DATE'
+    INVOICE_DATE = 'INVOICE_DATE'
+
+    CHOICES = [
+        ('', '---------'),
+        (CREATED_DATE, 'Created date'),
+        (INVOICE_DATE, 'Invoice date'),
+    ]
     date_type = forms.ChoiceField(label='Search by', choices=CHOICES, widget=forms.Select(
         attrs={'class': 'form-select'}), required=False)
     from_date = forms.DateField(
         label='From', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=False)
     to_date = forms.DateField(
         label='To', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=False)
+
+
+class SearchStatusForm(forms.Form):
+    # Add empty selection to STATUS_CHOICES
+    CHOICES = [('', '---------')] + SalesOrder.STATUS_CHOICES
+
+    # Submit form on dropdown selection
+    status = forms.ChoiceField(
+        label='Search by status', choices=CHOICES, widget=forms.Select(
+            attrs={'class': 'form-select', 'onChange': 'form.submit()'}), required=False)
 
 
 class SalesItem(models.Model):
