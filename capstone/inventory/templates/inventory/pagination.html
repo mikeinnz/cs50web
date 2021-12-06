@@ -1,5 +1,8 @@
 <nav aria-label="pagination">
     <ul class="pagination pagination-sm justify-content-end">
+        <span class="d-flex align-items-center me-2">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
         {% if page_obj.has_previous %}
             <li class="page-item">
                 <a class="page-link" href="?page=1">&laquo; first</a>

@@ -206,18 +206,18 @@ class SalesOrder(models.Model):
     def __str__(self):
         return f"Order No. { self.id } with ref #{ self.reference }"
 
-    def serialize(self):
-        return {
-            'id': self.id,
-            'created_date': self.created_date,
-            'invoice_date': self.invoice_date,
-            'first_name': self.customer.first_name,
-            'last_name': self.customer.last_name,
-            'status': self.status,
-            'channel': self.channel.channel,  # TODO: when channel is None type, fix erros
-            'warehouse': self.warehouse.warehouse,
-            'value': sum(i.sub_total() for i in self.items.all())
-        }
+    # def serialize(self):
+    #     return {
+    #         'id': self.id,
+    #         'created_date': self.created_date,
+    #         'invoice_date': self.invoice_date,
+    #         'first_name': self.customer.first_name,
+    #         'last_name': self.customer.last_name,
+    #         'status': self.status,
+    #         'channel': self.channel.channel,  # TODO: when channel is None type, fix erros
+    #         'warehouse': self.warehouse.warehouse,
+    #         'value': sum(i.sub_total() for i in self.items.all())
+    #     }
 
 
 class SalesOrderForm(ModelForm):
@@ -254,7 +254,7 @@ class SearchDateForm(forms.Form):
         (CREATED_DATE, 'Created date'),
         (INVOICE_DATE, 'Invoice date'),
     ]
-    date_type = forms.ChoiceField(label='Search by', choices=CHOICES, widget=forms.Select(
+    date_type = forms.ChoiceField(label='Search by date', choices=CHOICES, widget=forms.Select(
         attrs={'class': 'form-select'}), required=False)
     from_date = forms.DateField(
         label='From', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=False)

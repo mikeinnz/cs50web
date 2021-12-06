@@ -32,13 +32,16 @@
 
         
         <div class="d-flex flex-wrap justify-content-end align-items-top">
-            <form method="GET">
+            <form method="POST">
+                {% csrf_token %}
                 {{ status_form }}
             </form>
-            <div class="mt-4 ms-2">
+            <!-- <div class="mt-4 ms-2">
                 <button type="button" id="reset" class="btn btn-sm btn-primary">Reset</button>
-            </div>
-            <form method="GET" class="mt-4 ms-2">
+            </div> -->
+            <form method="POST" class="mt-4 ms-2">
+                {% csrf_token %}
+                <button type="submit" name="search" id="show_all" class="btn btn-sm btn-primary" value="reset">Reset</button>
                 <button type="submit" name="search" id="show_all" class="btn btn-sm btn-primary" value="show_all">Show All</button>
             </form>
         </div>

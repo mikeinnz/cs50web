@@ -294,34 +294,48 @@ def order(request):
     View Sales Orders
     """
 
-    date_form = SearchDateForm(request.POST or None)
-    status_form = SearchStatusForm(request.GET or None)
-
     # Set default orders excluding closed ones
     sales_orders = SalesOrder.objects.filter(
         user=request.user).exclude(status=SalesOrder.CLOSED).order_by('-id')
-
-    if request.method == "GET":
-        query = request.GET.get('search')
-        if query == "show_all":
-            sales_orders = SalesOrder.objects.filter(
-                user=request.user).order_by('-id')
-
-        elif status_form.is_valid():
-            status = status_form.cleaned_data['status']
-            sales_orders = SalesOrder.objects.filter(
-                user=request.user, status=status).order_by('-id')
+    date_form = SearchDateForm()
+    status_form = SearchStatusForm()
 
     if request.method == "POST":
-        if date_form.is_valid():
-            data = date_form.cleaned_data
-            if data['from_date'] is not None and data['to_date'] is not None:
-                if data['date_type'] == SearchDateForm.CREATED_DATE:
-                    sales_orders = SalesOrder.objects.filter(
-                        user=request.user, created_date__gte=data['from_date'], created_date__lte=data['to_date']).order_by('-created_date')
-                elif data['date_type'] == SearchDateForm.INVOICE_DATE:
-                    sales_orders = SalesOrder.objects.filter(
-                        user=request.user, invoice_date__gte=data['from_date'], invoice_date__lte=data['to_date']).order_by('-invoice_date')
+        # Save search input into session
+        request.session['post_data'] = request.POST
+
+    # Retrieve user input from session
+    if 'post_data' in request.session:
+        data = request.session['post_data']
+        # print(f'DATA:{data}')
+        if 'date_type' in data:
+            date_form = SearchDateForm(data)
+            if date_form.is_valid():
+                from_date = date_form.cleaned_data['from_date']
+                to_date = date_form.cleaned_data['to_date']
+                if from_date is not None and to_date is not None:
+                    if data['date_type'] == SearchDateForm.CREATED_DATE:
+                        sales_orders = SalesOrder.objects.filter(
+                            user=request.user, created_date__gte=from_date, created_date__lte=to_date).order_by('-created_date')
+                    elif data['date_type'] == SearchDateForm.INVOICE_DATE:
+                        sales_orders = SalesOrder.objects.filter(
+                            user=request.user, invoice_date__gte=from_date, invoice_date__lte=to_date).order_by('-invoice_date')
+
+        elif 'status' in data and data['status'] != '':
+            status_form = SearchStatusForm(data)
+            if status_form.is_valid():
+                status = status_form.cleaned_data['status']
+                sales_orders = SalesOrder.objects.filter(
+                    user=request.user, status=status).order_by('-id')
+
+        elif 'search' in data:
+            if data['search'] == 'show_all':
+                sales_orders = SalesOrder.objects.filter(
+                    user=request.user).order_by('-id')
+            elif data['search'] == 'reset':
+                # Set default orders excluding closed ones
+                sales_orders = SalesOrder.objects.filter(
+                    user=request.user).exclude(status=SalesOrder.CLOSED).order_by('-id')
 
     # Add order values to order list
     for order in sales_orders:
