@@ -48,7 +48,7 @@ function populate_products() {
 
                     options.forEach((option) => {
                         if (option.value != '') {
-                            option.innerHTML = option.innerHTML + `[ ${ Math.floor(list[option.value]) }]`
+                            option.innerHTML = option.innerHTML + ` [${ Math.floor(list[option.value]) }]`
                         }
                     })
                 })

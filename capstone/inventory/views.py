@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
+import math
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -10,8 +11,82 @@ from .models import *
 from .util import paginate_items, save_customer
 
 
+@login_required
 def index(request):
-    return render(request, "inventory/index.html")
+    """
+    Dashboard
+    """
+    today = datetime.now()
+    current_month = today.month
+
+    if current_month == 1:
+        last_month = current_month - 12
+    else:
+        last_month = current_month - 1
+
+    # Last quarter first date and last date
+    if current_month < 4:
+        first_date_last_quarter = date(today.year - 1, 10, 1)
+        last_date_last_quarter = date(today.year - 1, 12, 31)
+    elif current_month < 7:
+        first_date_last_quarter = date(today.year, 1, 1)
+        last_date_last_quarter = date(today.year, 3, 31)
+    elif current_month < 10:
+        first_date_last_quarter = date(today.year, 4, 1)
+        last_date_last_quarter = - date(today.year, 6, 30)
+    else:
+        first_date_last_quarter = date(today.year, 7, 1)
+        last_date_last_quarter = date(today.year, 9, 30)
+
+    # Calculate last quarter's sales
+    last_quarter_orders = SalesOrder.objects.filter(
+        user=request.user, invoice_date__gte=first_date_last_quarter, invoice_date__lte=last_date_last_quarter)
+    sales_last_quarter = 0
+    for order in last_quarter_orders:
+        items = SalesItem.objects.filter(order=order)
+        for item in items:
+            sales_last_quarter += item.sub_total()
+
+    # Top sales (last 90 days)
+    last_90_days_orders = SalesOrder.objects.filter(
+        user=request.user, invoice_date__gte=today-timedelta(days=5)).order_by('-created_date')
+    for order in last_90_days_orders:
+        order.value = 0
+        for item in SalesItem.objects.filter(order=order):
+            order.value = order.value + item.sub_total()
+
+    print(last_90_days_orders)
+    #top_orders = last_90_days_orders.order_by('value')[:5]
+
+    # Recent sales (top 5)
+    recent_orders = SalesOrder.objects.filter(
+        user=request.user).order_by('-created_date')[:5]
+
+    # Add order values to order list
+    for order in recent_orders:
+        order.value = 0
+        for item in SalesItem.objects.filter(order=order):
+            order.value = order.value + item.sub_total()
+
+    return render(request, "inventory/index.html", {
+        'sales_current_month': sales(request, current_month),
+        'sales_last_month': sales(request, last_month),
+        'sales_last_quarter': sales_last_quarter,
+        # 'top_orders': top_orders,
+        'recent_orders': recent_orders
+    })
+
+
+def sales(request, month):
+    orders = SalesOrder.objects.filter(
+        user=request.user, invoice_date__month=month)
+
+    sum = 0
+    for order in orders:
+        items = SalesItem.objects.filter(order=order)
+        for item in items:
+            sum += item.sub_total()
+    return sum
 
 
 @login_required
@@ -307,7 +382,7 @@ def order(request):
     # Retrieve user input from session
     if 'post_data' in request.session:
         data = request.session['post_data']
-        # print(f'DATA:{data}')
+
         if 'date_type' in data:
             date_form = SearchDateForm(data)
             if date_form.is_valid():
@@ -429,9 +504,7 @@ def edit_order(request, id):
                 shelf.quantity = shelf.quantity + item.quantity
                 print(f'NEW qty: {shelf.quantity}')
                 shelf.save()
-            print(sales_items)
             sales_items.delete()
-            print('EXISTING SALES ITEMS DELETED')
 
             # Save items and deduct from shelves
             success = save_sales_order(request, order, order_form, formset)
