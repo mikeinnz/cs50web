@@ -26,6 +26,35 @@ function create_order() {
 
 function populate_products() {
     warehouse = document.getElementById('id_warehouse');
+
+    // for 'edit' sales order page
+    if (warehouse.value !== '') {
+        fetch(`/warehouse/${warehouse.value}`)
+            .then(response => response.json())
+            .then(shelves => {
+
+                // transfer shelves data to a list with product_id as key and quantity as value
+                let list = {};
+                for (let s in shelves) {
+                    list[shelves[s].product_id] = shelves[s].quantity;
+                }
+
+                // obtain all dropdown lists
+                const items = document.querySelectorAll('.item .form-select');
+                
+                // for each product in each dropdown list, append available quantity at the end
+                items.forEach((item) => {
+                    const options = item.querySelectorAll('option');
+
+                    options.forEach((option) => {
+                        if (option.value != '') {
+                            option.innerHTML = option.innerHTML + `[ ${ Math.floor(list[option.value]) }]`
+                        }
+                    })
+                })
+            })
+    }
+
     warehouse.addEventListener('change', function() {
         if (warehouse.value !== '') {
             // reset order value
@@ -49,7 +78,7 @@ function populate_products() {
                     noselect.text = '---------';
                     item.add(noselect);
 
-                    // add all available options
+                    // add all available options, and append quantity at the end of product name
                     shelves.forEach((shelf) => {
                         const option = document.createElement('option');
                         option.value = shelf.product_id;

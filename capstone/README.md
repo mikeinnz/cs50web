@@ -28,3 +28,5 @@ Key features:
 - How to dynamically filter ModelChoice's queryset in a ModelForm? [https://simpleisbetterthancomplex.com/questions/2017/03/22/how-to-dynamically-filter-modelchoices-queryset-in-a-modelform.html]
 
 - Paginating the results of a Django forms POST request [https://stackoverflow.com/a/2266950]
+
+- How to add an event listener to multiple elements in JavaScript [https://flaviocopes.com/how-to-add-event-listener-multiple-elements-javascript/]

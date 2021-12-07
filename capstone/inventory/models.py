@@ -286,7 +286,7 @@ class SalesItem(models.Model):
         return self.quantity * (1 - self.discount) * self.price
 
     def __str__(self):
-        return f"Item: { self.quantity } x { self.product }"
+        return f"{ self.order}: { self.quantity } x { self.product }"
 
 
 class SalesItemForm(ModelForm):

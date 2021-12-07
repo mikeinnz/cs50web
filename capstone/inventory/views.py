@@ -374,37 +374,14 @@ def create_order(request):
         form.fields['product'].queryset = Product.objects.filter(
             user=request.user).order_by('name')
 
+    success = False
     if request.method == "POST":
         if formset.is_valid() and order_form.is_valid():
-            order.invoice_number = '123'  # TODO auto generate
-            saved = False
-
-            for f in formset:
-                item = f.save(commit=False)
-                item.order = order
-
-                # Save only items where product was selected
-                if hasattr(item, 'product'):
-                    print("ITEM:")
-                    print(item)
-                    shelf = Shelf.objects.get(
-                        user=request.user, warehouse=order.warehouse, product=item.product)
-
-                    # has enough inventory and quantity, price & discount must not be negative
-                    if shelf.quantity >= item.quantity and item.quantity > 0 and item.price >= 0 and item.discount >= 0:
-                        if (not saved):
-                            # Save order before its items
-                            order_form.save()
-                            saved = True
-                        item.save()
-                        # Update inventory
-                        shelf.quantity = shelf.quantity - item.quantity
-                        shelf.save()
-
-            if saved:
-                return HttpResponseRedirect(reverse("order"))
+            # Save items and deduct from shelves
+            success = save_sales_order(request, order, order_form, formset)
 
     return render(request, "inventory/sales_order_form.html", {
+        'success': success,
         'order_form': order_form,
         'item_formset': formset,
     })
@@ -420,6 +397,9 @@ def edit_order(request, id):
         order = SalesOrder.objects.get(pk=id, user=request.user)
     except SalesOrder.DoesNotExist:
         return JsonResponse({"error": "Sales Order not found."}, status=404)
+
+    # Remember the original warehouse
+    warehouse = order.warehouse
 
     data = request.POST or None
     order_form = SalesOrderForm(request.user, data, instance=order)
@@ -437,28 +417,24 @@ def edit_order(request, id):
     # pre-populate item details
     formset = SalesItemFormSet(data, initial=sales_items_list)
 
+    success = False
     if request.method == 'POST':
         if formset.is_valid() and order_form.is_valid():
-            if order_form.has_changed():
-                order_form.save()
 
-            reset = False
-            for form in formset:
-                if form.has_changed():
-                    # Remove existing items from database and update database
-                    if not reset:
-                        existing_items = SalesItem.objects.filter(order=order)
-                        shelf = Shelf.objects.get(
-                            user=request.user, warehouse=order.warehouse, product=item.product)
-                        reset = True
-                    item = form.save(commit=False)
-                    item.order = order
-                    print(form.changed_data)
-                    # Save only items where product was selected
-                    if hasattr(item, 'product'):
-                        print('HAAssss')
-                        item.save()
-            return HttpResponseRedirect(reverse('order'))
+            # Remove existing items and return to shelves
+            for item in sales_items:
+                shelf = Shelf.objects.get(
+                    user=request.user, warehouse=warehouse, product=item.product)
+                print(f'OLD qty: {shelf.quantity}')
+                shelf.quantity = shelf.quantity + item.quantity
+                print(f'NEW qty: {shelf.quantity}')
+                shelf.save()
+            print(sales_items)
+            sales_items.delete()
+            print('EXISTING SALES ITEMS DELETED')
+
+            # Save items and deduct from shelves
+            success = save_sales_order(request, order, order_form, formset)
 
     # Pre-populate only products available in the selected warehouse
     shelves_have_products = Shelf.objects.filter(
@@ -468,15 +444,41 @@ def edit_order(request, id):
         form.fields['product'].queryset = Product.objects.filter(
             pk__in=product_ids).order_by('name')
 
-    # print(formset)
-
-    # Prepopulate order value, and formate quantity & price to 2 decimal places
-
     return render(request, "inventory/sales_order_form.html", {
         'edit': True,
+        'success': success,
         'order_form': order_form,
         'item_formset': formset,
     })
+
+
+def save_sales_order(request, order, order_form, formset):
+    order.invoice_number = '123'  # TODO auto generate
+    saved = False
+
+    for f in formset:
+        item = f.save(commit=False)
+        item.order = order
+
+        # Save only items where product was selected
+        if hasattr(item, 'product'):
+            print("ITEM:")
+            print(item)
+            shelf = Shelf.objects.get(
+                user=request.user, warehouse=order.warehouse, product=item.product)
+
+            # has enough inventory and quantity, price & discount must not be negative
+            if shelf.quantity >= item.quantity and item.quantity > 0 and item.price >= 0 and item.discount >= 0:
+                if (not saved):
+                    # Save order before its items
+                    order_form.save()
+                    saved = True
+                item.save()
+                # Update inventory
+                shelf.quantity = shelf.quantity - item.quantity
+                shelf.save()
+
+    return saved
 
 
 @ login_required
