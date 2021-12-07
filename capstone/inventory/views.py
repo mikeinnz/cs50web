@@ -53,10 +53,11 @@ def index(request):
     for order in last_90_days_orders:
         order.value = 0
         for item in SalesItem.objects.filter(order=order):
-            order.value = order.value + item.sub_total()
+            order.value += item.sub_total()
 
-    print(last_90_days_orders)
-    #top_orders = last_90_days_orders.order_by('value')[:5]
+    # Top 5 orders by value
+    top_orders = sorted(last_90_days_orders,
+                        key=lambda o: o.value, reverse=True)[:5]
 
     # Recent sales (top 5)
     recent_orders = SalesOrder.objects.filter(
@@ -72,7 +73,7 @@ def index(request):
         'sales_current_month': sales(request, current_month),
         'sales_last_month': sales(request, last_month),
         'sales_last_quarter': sales_last_quarter,
-        # 'top_orders': top_orders,
+        'top_orders': top_orders,
         'recent_orders': recent_orders
     })
 
@@ -425,13 +426,13 @@ def order(request):
     })
 
 
-@ login_required
+@login_required
 def order_api(request):
     all_orders = SalesOrder.objects.filter(user=request.user).order_by('-id')
     return JsonResponse([order.serialize() for order in all_orders], safe=False)
 
 
-@ login_required
+@login_required
 def create_order(request):
     """
     Create a new sales order and update inventory
@@ -462,7 +463,7 @@ def create_order(request):
     })
 
 
-@ login_required
+@login_required
 def edit_order(request, id):
     """
     Edit a sales order
@@ -554,7 +555,7 @@ def save_sales_order(request, order, order_form, formset):
     return saved
 
 
-@ login_required
+@login_required
 def create_sales_channel(request):
     """
     Create a new sales channel
@@ -577,7 +578,7 @@ def create_sales_channel(request):
         })
 
 
-@ login_required
+@login_required
 def edit_sales_channel(request, id):
     """
     Edit a sales channel (name only)
