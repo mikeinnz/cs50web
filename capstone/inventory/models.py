@@ -1,10 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.base import Model
 from django.db.models.deletion import CASCADE
-from django.forms import ModelForm, widgets
+from django.forms import ModelForm
 
 from datetime import date
 
@@ -136,7 +134,8 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     sku = models.CharField(blank=True, max_length=20)
     barcode = models.CharField(blank=True, max_length=32)
-    category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT)
+    category = models.ForeignKey(
+        ProductCategory, on_delete=models.PROTECT, related_name="products")
     batch = models.CharField(max_length=20)
     expiry_date = models.DateField(null=True, blank=True)
     unit_cost = models.DecimalField(

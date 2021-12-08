@@ -16,6 +16,7 @@ def index(request):
     """
     Dashboard
     """
+    # Current month and last month in number
     today = datetime.now()
     current_month = today.month
 
@@ -49,11 +50,9 @@ def index(request):
 
     # Top sales (last 90 days)
     last_90_days_orders = SalesOrder.objects.filter(
-        user=request.user, invoice_date__gte=today-timedelta(days=5)).order_by('-created_date')
-    for order in last_90_days_orders:
-        order.value = 0
-        for item in SalesItem.objects.filter(order=order):
-            order.value += item.sub_total()
+        user=request.user, invoice_date__gte=today-timedelta(days=90)).order_by('-created_date')
+    # Add order values to order list
+    last_90_days_orders = add_order_values(last_90_days_orders)
 
     # Top 5 orders by value
     top_orders = sorted(last_90_days_orders,
@@ -62,19 +61,29 @@ def index(request):
     # Recent sales (top 5)
     recent_orders = SalesOrder.objects.filter(
         user=request.user).order_by('-created_date')[:5]
-
     # Add order values to order list
-    for order in recent_orders:
-        order.value = 0
-        for item in SalesItem.objects.filter(order=order):
-            order.value = order.value + item.sub_total()
+    recent_orders = add_order_values(recent_orders)
+
+    # Sales (last 90 days) by category
+    values = {}
+    for order in last_90_days_orders:
+        items = SalesItem.objects.filter(order=order)
+        for item in items:
+            category = item.product.category.category
+            if not category in values:
+                values[category] = 0
+            values[category] += item.sub_total()
+
+    sales_by_category = sorted(
+        values.items(), key=lambda i: i[1], reverse=True)
 
     return render(request, "inventory/index.html", {
         'sales_current_month': sales(request, current_month),
         'sales_last_month': sales(request, last_month),
         'sales_last_quarter': sales_last_quarter,
         'top_orders': top_orders,
-        'recent_orders': recent_orders
+        'recent_orders': recent_orders,
+        'sales_by_category': sales_by_category
     })
 
 
@@ -88,6 +97,14 @@ def sales(request, month):
         for item in items:
             sum += item.sub_total()
     return sum
+
+
+def add_order_values(orders):
+    for order in orders:
+        order.value = 0
+        for item in SalesItem.objects.filter(order=order):
+            order.value += item.sub_total()
+    return orders
 
 
 @login_required
@@ -536,8 +553,6 @@ def save_sales_order(request, order, order_form, formset):
 
         # Save only items where product was selected
         if hasattr(item, 'product'):
-            print("ITEM:")
-            print(item)
             shelf = Shelf.objects.get(
                 user=request.user, warehouse=order.warehouse, product=item.product)
 
