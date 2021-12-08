@@ -1,10 +1,8 @@
 from datetime import date, datetime, timedelta
-from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
-from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
-import math
-from django.shortcuts import render
+from django.http.response import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from .models import *
@@ -64,18 +62,25 @@ def index(request):
     # Add order values to order list
     recent_orders = add_order_values(recent_orders)
 
-    # Sales (last 90 days) by category
-    values = {}
+    # Top selling products and Top selling category (last 90 days)
+    values_by_product = {}
+    values_by_category = {}
     for order in last_90_days_orders:
         items = SalesItem.objects.filter(order=order)
         for item in items:
+            product = item.product
             category = item.product.category.category
-            if not category in values:
-                values[category] = 0
-            values[category] += item.sub_total()
+            if not product in values_by_product:
+                values_by_product[product] = 0
+            values_by_product[product] += item.sub_total()
+            if not category in values_by_category:
+                values_by_category[category] = 0
+            values_by_category[category] += item.sub_total()
 
+    sales_by_product = sorted(
+        values_by_product.items(), key=lambda i: i[1], reverse=True)[:5]
     sales_by_category = sorted(
-        values.items(), key=lambda i: i[1], reverse=True)
+        values_by_category.items(), key=lambda i: i[1], reverse=True)[:5]
 
     return render(request, "inventory/index.html", {
         'sales_current_month': sales(request, current_month),
@@ -83,7 +88,8 @@ def index(request):
         'sales_last_quarter': sales_last_quarter,
         'top_orders': top_orders,
         'recent_orders': recent_orders,
-        'sales_by_category': sales_by_category
+        'sales_by_category': sales_by_category,
+        'sales_by_product': sales_by_product,
     })
 
 
@@ -150,11 +156,12 @@ def edit_customer(request, id):
     """
     Edit a customer
     """
-    try:
-        customer = Customer.objects.get(pk=id, user=request.user)
-    except Customer.DoesNotExist:
-        return JsonResponse({"error": "Customer not found."}, status=404)
-        # TODO: show message instead of JsonResponse - try get_object_or_404
+    # try:
+    #     customer = Customer.objects.get(pk=id, user=request.user)
+    # except Customer.DoesNotExist:
+    #     return JsonResponse({"error": "Customer not found."}, status=404)
+    # Use the above option or simply use get_object_or_404
+    customer = get_object_or_404(Customer, pk=id, user=request.user)
 
     if request.method == "POST":
         save_customer(request, customer)
@@ -219,10 +226,7 @@ def edit_warehouse(request, id):
     if not request.user.is_authenticated:
         return JsonResponse(status=404)
 
-    try:
-        warehouse = Warehouse.objects.get(pk=id, user=request.user)
-    except Warehouse.DoesNotExist:
-        return JsonResponse({"error": "Warehouse not found."}, status=404)
+    warehouse = get_object_or_404(Warehouse, pk=id, user=request.user)
 
     if request.method == "POST":
         warehouse_form = WarehouseForm(
@@ -244,11 +248,7 @@ def view_warehouse(request, id):
     """
     View a specified warehouse's inventory
     """
-    try:
-        warehouse = Warehouse.objects.get(pk=id, user=request.user)
-    except Warehouse.DoesNotExist:
-        return JsonResponse({"error": "Warehouse not found."}, status=404)
-        # TODO: show message instead of JsonResponse
+    warehouse = get_object_or_404(Warehouse, pk=id, user=request.user)
 
     shelves = Shelf.objects.filter(
         user=request.user, warehouse=warehouse).order_by('-product')
@@ -261,11 +261,13 @@ def view_warehouse(request, id):
 
 @login_required
 def warehouse_api(request, id):
+    """
+    Return a warehouse's inventory data as a json response
+    """
     try:
         warehouse = Warehouse.objects.get(pk=id, user=request.user)
     except Warehouse.DoesNotExist:
         return JsonResponse({"error": "Warehouse not found."}, status=404)
-        # TODO: show message instead of JsonResponse
 
     shelves = Shelf.objects.filter(
         user=request.user, warehouse=warehouse)
@@ -314,11 +316,7 @@ def edit_product(request, id):
     """
     Edit a product
     """
-    try:
-        product = Product.objects.get(pk=id, user=request.user)
-    except Product.DoesNotExist:
-        return JsonResponse({"error": "Product not found."}, status=404)
-        # TODO: show message instead of JsonResponse
+    product = get_object_or_404(Product, pk=id, user=request.user)
 
     if request.method == "POST":
         product_form = ProductForm(request.user,
@@ -362,10 +360,7 @@ def edit_category(request, id):
     """
     Edit a category (name only)
     """
-    try:
-        category = ProductCategory.objects.get(pk=id, user=request.user)
-    except ProductCategory.DoesNotExist:
-        return JsonResponse({"error": "Category not found."}, status=404)
+    category = get_object_or_404(ProductCategory, pk=id, user=request.user)
 
     if request.method == "POST":
         category_form = ProductCategoryForm(
@@ -384,7 +379,7 @@ def edit_category(request, id):
 @login_required
 def order(request):
     """
-    View Sales Orders
+    View Sales Orders in a table with search form
     """
 
     # Set default orders excluding closed ones
@@ -486,10 +481,7 @@ def edit_order(request, id):
     Edit a sales order
     """
 
-    try:
-        order = SalesOrder.objects.get(pk=id, user=request.user)
-    except SalesOrder.DoesNotExist:
-        return JsonResponse({"error": "Sales Order not found."}, status=404)
+    order = get_object_or_404(SalesOrder, pk=id, user=request.user)
 
     # Remember the original warehouse
     warehouse = order.warehouse
@@ -518,9 +510,7 @@ def edit_order(request, id):
             for item in sales_items:
                 shelf = Shelf.objects.get(
                     user=request.user, warehouse=warehouse, product=item.product)
-                print(f'OLD qty: {shelf.quantity}')
                 shelf.quantity = shelf.quantity + item.quantity
-                print(f'NEW qty: {shelf.quantity}')
                 shelf.save()
             sales_items.delete()
 
@@ -544,7 +534,10 @@ def edit_order(request, id):
 
 
 def save_sales_order(request, order, order_form, formset):
-    order.invoice_number = '123'  # TODO auto generate
+    # Set invoice_number incrementally (same as id)
+    if order.invoice_number is None:
+        order.invoice_number = SalesOrder.objects.all().last().id + 1
+
     saved = False
 
     for f in formset:
@@ -598,10 +591,7 @@ def edit_sales_channel(request, id):
     """
     Edit a sales channel (name only)
     """
-    try:
-        channel = SalesChannel.objects.get(pk=id, user=request.user)
-    except SalesChannel.DoesNotExist:
-        return JsonResponse({"error": "Channel not found."}, status=404)
+    channel = get_object_or_404(SalesChannel, pk=id, user=request.user)
 
     if request.method == "POST":
         channel_form = SalesChannelForm(

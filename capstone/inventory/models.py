@@ -28,7 +28,7 @@ class Customer(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{ self.user }'s customer: { self.first_name } { self.last_name }"
+        return f"{ self.first_name } { self.last_name }"
 
 
 class CustomerContactForm(ModelForm):
@@ -203,7 +203,7 @@ class SalesOrder(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Order No. { self.id } with ref #{ self.reference }"
+        return f"Order No. { self.id }"
 
     # def serialize(self):
     #     return {

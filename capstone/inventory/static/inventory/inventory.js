@@ -32,6 +32,10 @@ function populate_products() {
         fetch(`/warehouse/${warehouse.value}`)
             .then(response => response.json())
             .then(shelves => {
+                // show errors if any
+                if (shelves.error) {
+                    alert(shelves.error);
+                }
 
                 // transfer shelves data to a list with product_id as key and quantity as value
                 let list = {};

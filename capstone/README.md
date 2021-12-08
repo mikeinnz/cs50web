@@ -16,12 +16,12 @@ Key features:
 
 
 ## Future Improvements
-- Add filter and sorting to Warehouses using list.js or django-filter
+- Add filter and sorting to Warehouses, Products, Categories using list.js or django-filter
 - Report: View by product, add product view
-- Allow creating a new customer when creating a new sales order
 - Increment invoice number with customer name as a prefix
 - Allow managing products by batch
 - Toggle left menu
+- Allow creating a new customer when creating a new sales order
 
 
 ## References:
