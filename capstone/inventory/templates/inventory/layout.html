@@ -44,31 +44,31 @@
                         {% if user.is_authenticated %}
                             <ul class="nav flex-column">
                                 <li class="nav-item">
-                                    <a class="nav-link active" aria-current="page" href="{% url 'index' %}">
+                                    <a class="nav-link {% if heading == 'Dashboard' %}active{% endif %}" aria-current="page" href="{% url 'index' %}">
                                         <span data-feather="home"></span>
                                         Dashboard
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'order' %}">
+                                    <a class="nav-link {% if heading == 'Sales Orders' %}active{% endif %}" href="{% url 'order' %}">
                                         <span data-feather="file"></span>
                                         Sales Orders
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'list_customer' %}">
+                                    <a class="nav-link {% if heading == 'Customers' %}active{% endif %}" href="{% url 'list_customer' %}">
                                         <span data-feather="users"></span>
                                         Customers
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'product' %}">
+                                    <a class="nav-link {% if heading == 'Products' %}active{% endif %}" href="{% url 'product' %}">
                                         <span data-feather="shopping-cart"></span>
                                         Products
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'warehouse' %}">
+                                    <a class="nav-link {% if heading == 'Warehouses' %}active{% endif %}" href="{% url 'warehouse' %}">
                                         <span data-feather="package"></span>
                                         Warehouses
                                     </a>
@@ -83,7 +83,7 @@
                             </h6>
                             <ul class="nav flex-column mb-2">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'warehouse' %}">
+                                    <a class="nav-link " href="{% url 'warehouse' %}">
                                         <span data-feather="file-text"></span>
                                         Stock on hand
                                     </a>

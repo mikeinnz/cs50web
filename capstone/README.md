@@ -2,7 +2,7 @@
 
 ## Description
 Design an inventory and sales operations app which allows users to manage products and sales.
-Django was used in the backend, and Javascript in the frontend.
+Django was used on the backend, and part of the frontend uses Javascript.
 
 #### Key features:
 - Dashboard: view sales figures and brief reports such as recent sales, top sales, top selling products/categories
@@ -13,7 +13,7 @@ Django was used in the backend, and Javascript in the frontend.
 
 #### Specifications:
 - Login/logout: using Django's built-in users and authentication system
-- Layout: using [Bootstrap dashboard] (https://getbootstrap.com/docs/5.1/examples/dashboard/).
+- Layout & Styling: using using Bootrap and [Bootstrap dashboard] (https://getbootstrap.com/docs/5.1/examples/dashboard/).
 - Each user can create their own inventory and sales data. They cannot access other users' data.
 - Inventory is loaded from the Django backend/admin.
 - Customers:
@@ -62,7 +62,7 @@ This web application allows users to manage sales and inventory. It is distinct 
         - Search input must be preserved in the next pages so session was utilised.
     - Create/Edit a Sales Order:
         - Only products available in the selected warehouse (and the current user) should be displayed. This was done via an api call to server.
-        - 'Add Product' button dynamically clone a previous product and add to the view.
+        - 'Add Product' button dynamically clone a previous form and add to the view. This forms part of the formset on the backend.
         - For the Edit view, data needs to be prepopulated and inventory must be updated when order is saved. For easy implementation, inventory was removed from database and then added with new data.
         - Order value is dynamically calculated whenever product, quantity, or price is changed.
 

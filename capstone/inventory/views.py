@@ -83,6 +83,7 @@ def index(request):
         values_by_category.items(), key=lambda i: i[1], reverse=True)[:5]
 
     return render(request, "inventory/index.html", {
+        'heading': 'Dashboard',
         'sales_current_month': sales(request, current_month),
         'sales_last_month': sales(request, last_month),
         'sales_last_quarter': sales_last_quarter,
@@ -147,6 +148,7 @@ def list_customer(request):
         user=request.user).order_by('first_name')
 
     return render(request, "inventory/customer_list.html", {
+        "heading": "Customers",
         "page_obj": paginate_items(request, customers)
     })
 
@@ -190,6 +192,7 @@ def warehouse(request):
     shelves = Shelf.objects.filter(
         user=request.user).order_by('warehouse', '-product')
     return render(request, "inventory/warehouse.html", {
+        'heading': 'Warehouses',
         'warehouses': warehouses,
         'shelves': shelves
     })
@@ -285,6 +288,7 @@ def product(request):
 
     products = Product.objects.filter(user=request.user).order_by('name')
     return render(request, "inventory/product.html", {
+        'heading': 'Products',
         'page_obj': paginate_items(request, products),
     })
 
@@ -432,6 +436,7 @@ def order(request):
             order.value = order.value + item.sub_total()
 
     return render(request, "inventory/sales_order.html", {
+        "heading": "Sales Orders",
         "date_form": date_form,
         "status_form": status_form,
         "page_obj": paginate_items(request, sales_orders)
